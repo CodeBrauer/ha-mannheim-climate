@@ -1,0 +1,21 @@
+{
+  "domain": "mannheim_climate",
+  "name": "Klimamessnetz Mannheim",
+  "categories": [
+    "sensors.temperature_humidity",
+    "weather_alerts"
+  ],
+  "codeowners": [
+    "@CodeBrauer"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "http"
+  ],
+  "documentation": "https://github.com/CodeBrauer/ha-mannheim-climate",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/CodeBrauer/ha-mannheim-climate/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

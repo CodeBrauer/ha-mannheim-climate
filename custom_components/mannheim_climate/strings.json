@@ -1,0 +1,201 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Location",
+        "description": "Pick the place you want climate values for. The circle is the search radius for nearby stations.",
+        "data": {
+          "location": "Location"
+        },
+        "data_description": {
+          "location": "Defaults to your home location."
+        }
+      },
+      "reconfigure": {
+        "title": "Move location",
+        "description": "Pick the new place. Afterwards you confirm the surroundings and the stations again.",
+        "data": {
+          "location": "Location"
+        }
+      },
+      "environment": {
+        "title": "Surroundings",
+        "description": "How is the area around this place built up? This decides which stations represent it best. The pre-selection comes from the Local Climate Zone map.",
+        "data": {
+          "environment": "Surroundings"
+        }
+      },
+      "stations": {
+        "title": "Stations",
+        "description": "{recommendation}\n\n{recommended_list}\n\nWith this choice the location is updated every {interval} min ({planned} of at most {budget} API requests per hour; the API limit of {api_limit} per hour applies per internet connection).",
+        "menu_options": {
+          "accept": "Use the recommendation",
+          "map": "Choose on the interactive map",
+          "list": "Choose from a list"
+        }
+      },
+      "map": {
+        "title": "Choose stations on the map",
+        "description": "The map opens in a new window. If it does not, [open the map]({url}). After saving there, setup continues here automatically."
+      },
+      "list": {
+        "title": "Stations",
+        "description": "{recommendation}\n\nThe recommendation is pre-selected. Planned API requests: {planned} per hour at an update interval of {interval} min (at most {budget}; the API limit of {api_limit} per hour applies per internet connection).",
+        "data": {
+          "temperature_sensors": "Stations for temperature and humidity (at most {max_stations})",
+          "wind_sensor": "Station for wind"
+        },
+        "data_description": {
+          "temperature_sensors": "One station is used as is, several are combined (median, outliers removed). The maximum follows from the API budget.",
+          "wind_sensor": "Wind is not averaged; pick one station."
+        }
+      }
+    },
+    "error": {
+      "outside_coverage": "There is no station within 10 km of this place.",
+      "no_station_selected": "Select at least one station.",
+      "too_many_stations": "Select at most 6 stations.",
+      "over_budget": "Too many API requests per hour. Select fewer stations or a longer update interval in the options.",
+      "unknown_station": "One of the selected stations is unknown. Reload the page and try again."
+    },
+    "abort": {
+      "already_configured": "This location is already configured.",
+      "cannot_connect": "The station list could not be loaded from api.smartmannheim.de. Try again later.",
+      "reconfigure_successful": "The location was updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stations and settings",
+        "description": "{recommendation}\n\nPlanned API requests: {planned} per hour at an update interval of {interval} min (at most {budget}; the API limit of {api_limit} per hour applies per internet connection).\n\nTo choose stations on the interactive map, use *Reconfigure* in the integration's menu.",
+        "data": {
+          "temperature_sensors": "Stations for temperature and humidity (at most {max_stations} at {interval} min)",
+          "wind_sensor": "Station for wind",
+          "scan_interval": "Update interval",
+          "dew_point_offset": "Dew point correction"
+        },
+        "data_description": {
+          "temperature_sensors": "One station is used as is, several are combined (median, outliers removed). The maximum follows from the API budget.",
+          "wind_sensor": "Wind is not averaged; pick one station.",
+          "scan_interval": "New values arrive every 10 minutes with 10-20 minutes delay.",
+          "dew_point_offset": "Added to the dew point before humidity is calculated. The network tends to read too humid; -1.3 K matched the DWD station Mannheim in a 31-day comparison."
+        }
+      }
+    },
+    "error": {
+      "no_station_selected": "Select at least one station.",
+      "too_many_stations": "Select at most 6 stations.",
+      "over_budget": "Too many API requests per hour. Select fewer stations or a longer update interval.",
+      "unknown_station": "One of the selected stations is unknown. Reload the page and try again."
+    },
+    "abort": {
+      "cannot_connect": "The station list could not be loaded from api.smartmannheim.de. Try again later."
+    }
+  },
+  "selector": {
+    "environment": {
+      "options": {
+        "dense": "Densely built (compact city blocks)",
+        "open_built": "Open built-up area (detached or row houses, blocks with green space)",
+        "industrial": "Industrial or large commercial buildings",
+        "green": "Green or open land (park, forest, fields, water)"
+      }
+    },
+    "environment_short": {
+      "options": {
+        "dense": "densely built",
+        "open_built": "open built-up",
+        "industrial": "industrial",
+        "green": "green/open"
+      }
+    },
+    "station_flag": {
+      "options": {
+        "elevated": "roof/high point",
+        "recommended": "recommended",
+        "wind": "Wind",
+        "no_wind": "no wind station"
+      }
+    },
+    "recommendation": {
+      "options": {
+        "nearest_fits": "The nearest station **{station}** ({distance}) has the same surroundings and is used on its own.",
+        "nearest_too_far": "The nearest station **{station}** is {distance} away. Recommended: the combination of {count} stations around you.",
+        "nearest_other_environment": "The nearest station **{station}** ({distance}) has other surroundings ({environment}). Recommended: the combination of {count} stations, same surroundings first."
+      }
+    },
+    "map_page": {
+      "options": {
+        "title": "Choose stations",
+        "hint": "Click a station to select or deselect it. Zoom in where stations are close together.",
+        "counter": "{count} of at most {max} stations selected",
+        "limit_reached": "At most {max} stations fit the API budget. Deselect one first.",
+        "none_selected": "Select at least one station.",
+        "over_budget": "This choice does not fit the API budget. Select fewer stations or no wind station.",
+        "budget": "Updates every {interval} min · {requests} of {budget} API requests per hour",
+        "wind": "Station for wind",
+        "submit": "Save",
+        "saving": "Saving…",
+        "done": "Saved. You can close this window, setup in Home Assistant continues automatically.",
+        "error": "Saving failed ({error}). Restart the setup in Home Assistant.",
+        "remove": "Remove",
+        "elevated": "roof/high point",
+        "legend_selected": "selected",
+        "legend_recommended": "recommended",
+        "legend_other": "other station",
+        "legend_elevated": "roof or high point",
+        "legend_home": "your location"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "dew_point": {
+        "name": "Dew point"
+      },
+      "apparent_temperature": {
+        "name": "Apparent temperature"
+      },
+      "irradiance": {
+        "name": "Global irradiance"
+      },
+      "wind_gust": {
+        "name": "Wind gust"
+      },
+      "stations_used": {
+        "name": "Stations used"
+      },
+      "temperature_spread": {
+        "name": "Temperature spread"
+      },
+      "last_measurement": {
+        "name": "Last measurement"
+      }
+    }
+  },
+  "exceptions": {
+    "no_recent_data": {
+      "message": "None of the selected stations delivered data in the last 40 minutes."
+    },
+    "waiting_for_budget": {
+      "message": "The API request budget is used up for the moment. Retrying in {seconds} seconds."
+    },
+    "station_list_unavailable": {
+      "message": "The station list could not be loaded from api.smartmannheim.de."
+    },
+    "no_stations_available": {
+      "message": "None of the selected stations exists any more. Reconfigure the stations in the integration options."
+    }
+  },
+  "issues": {
+    "station_offline": {
+      "title": "Station {station} sends no data",
+      "description": "The station {station} used by \"{entry}\" has not delivered data for 24 hours. The other selected stations are still used. If this continues, pick another station in the integration options."
+    },
+    "station_removed": {
+      "title": "Station {station} no longer exists",
+      "description": "The API no longer knows the station {station} used by \"{entry}\". Pick another station in the integration options."
+    }
+  }
+}

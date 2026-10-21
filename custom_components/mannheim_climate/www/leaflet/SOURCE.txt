@@ -1,0 +1,1 @@
+Leaflet 1.9.4 from https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz (sha512 verified against npm registry integrity, 2026-10-21)

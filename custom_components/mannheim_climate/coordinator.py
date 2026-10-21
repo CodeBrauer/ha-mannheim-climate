@@ -1,0 +1,203 @@
+"""Polls the selected stations and combines their values."""
+
+from __future__ import annotations
+
+from datetime import timedelta
+from typing import TYPE_CHECKING
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
+from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
+
+from .aggregation import Estimate, StationReading, estimate, latest_valid
+from .api import ApiError, SensorNotFoundError
+from .const import (
+    CATCH_UP_MARGIN_S,
+    CONF_DEW_POINT_OFFSET,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_DEW_POINT_OFFSET_K,
+    DEFAULT_SCAN_INTERVAL_MIN,
+    DOMAIN,
+    LOGGER,
+    MAX_MEASUREMENT_AGE,
+    STATION_OFFLINE_AFTER,
+    Field,
+)
+from .hub import RequestDeferredError
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from homeassistant.core import CALLBACK_TYPE, HomeAssistant
+
+    from .api import ApiSensor, Measurement
+    from .hub import ClimateHub
+    from .stations import Station
+
+type MannheimClimateConfigEntry = ConfigEntry[ClimateCoordinator]
+
+
+def issue_id(entry_id: str, kind: str, sensor_id: str) -> str:
+    """Return the repair issue id for a sensor of a config entry."""
+    return f"{kind}_{entry_id}_{sensor_id}"
+
+
+class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
+    """Fetch the latest values of all selected stations of one config entry."""
+
+    config_entry: MannheimClimateConfigEntry
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: MannheimClimateConfigEntry,
+        hub: ClimateHub,
+        stations: list[Station],
+        wind_station: Station | None,
+    ) -> None:
+        """Remember the stations; offline detection starts counting now."""
+        super().__init__(
+            hass,
+            LOGGER,
+            config_entry=entry,
+            name=f"{DOMAIN}_{entry.title}",
+            update_interval=timedelta(
+                minutes=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN)
+            ),
+        )
+        self.hub = hub
+        self.stations = stations
+        self.wind_station = wind_station
+        self._latitude = entry.data[CONF_LATITUDE]
+        self._longitude = entry.data[CONF_LONGITUDE]
+        self._dew_point_offset = entry.options.get(
+            CONF_DEW_POINT_OFFSET, DEFAULT_DEW_POINT_OFFSET_K
+        )
+        started = dt_util.utcnow()
+        self._last_seen: dict[str, datetime] = {
+            sensor.id: started for sensor in self.sensors
+        }
+        self._deferred_wait = 0.0
+        self._catch_up_unsub: CALLBACK_TYPE | None = None
+
+    @property
+    def sensors(self) -> list[ApiSensor]:
+        """All API sensors this entry polls."""
+        sensors = [s.temperature_sensor for s in self.stations if s.temperature_sensor]
+        if self.wind_station and self.wind_station.wind_sensor:
+            sensors.append(self.wind_station.wind_sensor)
+        return sensors
+
+    def provides(self, field: Field) -> bool:
+        """Return True if any selected sensor measures this field."""
+        return any(field in sensor.parameters for sensor in self.sensors)
+
+    def distance_to(self, station: Station) -> float:
+        """Distance from the configured location to a station in metres."""
+        return station.distance_to(self._latitude, self._longitude)
+
+    async def _async_update_data(self) -> Estimate:
+        now = dt_util.utcnow()
+        self._deferred_wait = 0.0
+        readings: list[StationReading] = []
+        failed = 0
+        for station in self.stations:
+            sensor = station.temperature_sensor
+            latest = await self._async_latest(station, sensor, now)
+            if latest is None:
+                failed += 1
+                continue
+            readings.append(
+                StationReading(station.code, self.distance_to(station), latest)
+            )
+
+        wind = None
+        if self.wind_station and self.wind_station.wind_sensor:
+            wind = await self._async_latest(
+                self.wind_station, self.wind_station.wind_sensor, now
+            )
+
+        if self._deferred_wait:
+            self._schedule_catch_up(self._deferred_wait)
+        if not readings and self._deferred_wait:
+            raise UpdateFailed(
+                translation_domain=DOMAIN,
+                translation_key="waiting_for_budget",
+                translation_placeholders={"seconds": f"{self._deferred_wait:.0f}"},
+                retry_after=self._deferred_wait + CATCH_UP_MARGIN_S,
+            )
+        if not readings:
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="no_recent_data"
+            )
+        if failed:
+            LOGGER.debug(
+                "%s of %s stations without recent data", failed, len(self.stations)
+            )
+        return estimate(readings, wind, self._dew_point_offset)
+
+    async def _async_latest(
+        self, station: Station, sensor: ApiSensor, now: datetime
+    ) -> Measurement | None:
+        try:
+            measurements = await self.hub.async_get_measurements(sensor.id)
+        except RequestDeferredError as err:
+            # Use what we have now, fetch the rest once the budget allows it.
+            self._deferred_wait = max(self._deferred_wait, err.wait)
+            measurements = self.hub.cached_measurements(sensor.id)
+        except SensorNotFoundError:
+            self._set_issue("station_removed", station, sensor, active=True)
+            return None
+        except ApiError as err:
+            LOGGER.debug("Fetching %s failed: %s", sensor.name, err)
+            return None
+        latest = latest_valid(measurements, now, MAX_MEASUREMENT_AGE)
+        if latest:
+            self._last_seen[sensor.id] = now
+        offline = now - self._last_seen[sensor.id] > STATION_OFFLINE_AFTER
+        self._set_issue("station_offline", station, sensor, active=offline)
+        self._set_issue("station_removed", station, sensor, active=False)
+        return latest
+
+    def _schedule_catch_up(self, wait: float) -> None:
+        if self._catch_up_unsub:
+            return
+        LOGGER.debug("Fetching skipped stations in %.0f s", wait)
+
+        async def _catch_up(_now: datetime) -> None:
+            self._catch_up_unsub = None
+            await self.async_request_refresh()
+
+        self._catch_up_unsub = async_call_later(
+            self.hass, wait + CATCH_UP_MARGIN_S, _catch_up
+        )
+
+    async def async_shutdown(self) -> None:
+        """Cancel a pending catch-up refresh."""
+        if self._catch_up_unsub:
+            self._catch_up_unsub()
+            self._catch_up_unsub = None
+        await super().async_shutdown()
+
+    def _set_issue(
+        self, kind: str, station: Station, sensor: ApiSensor, *, active: bool
+    ) -> None:
+        issue = issue_id(self.config_entry.entry_id, kind, sensor.id)
+        if not active:
+            ir.async_delete_issue(self.hass, DOMAIN, issue)
+            return
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            issue,
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=kind,
+            translation_placeholders={
+                "station": f"{station.label} / {sensor.name}",
+                "entry": self.config_entry.title,
+            },
+        )

@@ -1,0 +1,201 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Standort",
+        "description": "Wähle den Ort, für den du Klimawerte möchtest. Der Kreis ist der Suchradius für Stationen in der Nähe.",
+        "data": {
+          "location": "Standort"
+        },
+        "data_description": {
+          "location": "Vorbelegt mit deinem Zuhause."
+        }
+      },
+      "reconfigure": {
+        "title": "Standort verschieben",
+        "description": "Wähle den neuen Ort. Danach bestätigst du Umgebung und Stationen erneut.",
+        "data": {
+          "location": "Standort"
+        }
+      },
+      "environment": {
+        "title": "Umgebung",
+        "description": "Wie ist die Gegend um diesen Ort bebaut? Danach richtet sich, welche Stationen ihn am besten abbilden. Vorausgewählt ist der Typ laut Karte der lokalen Klimazonen (LCZ).",
+        "data": {
+          "environment": "Umgebung"
+        }
+      },
+      "stations": {
+        "title": "Stationen",
+        "description": "{recommendation}\n\n{recommended_list}\n\nMit dieser Auswahl wird alle {interval} min aktualisiert ({planned} von höchstens {budget} API-Abfragen pro Stunde; das API-Limit von {api_limit} pro Stunde gilt pro Internetanschluss).",
+        "menu_options": {
+          "accept": "Empfehlung übernehmen",
+          "map": "Auf der interaktiven Karte auswählen",
+          "list": "Aus einer Liste auswählen"
+        }
+      },
+      "map": {
+        "title": "Stationen auf der Karte wählen",
+        "description": "Die Karte öffnet sich in einem neuen Fenster. Falls nicht, [Karte öffnen]({url}). Nach dem Speichern dort geht es hier automatisch weiter."
+      },
+      "list": {
+        "title": "Stationen",
+        "description": "{recommendation}\n\nDie Empfehlung ist vorausgewählt. Geplante API-Abfragen: {planned} pro Stunde bei einem Aktualisierungsintervall von {interval} min (höchstens {budget}; das API-Limit von {api_limit} pro Stunde gilt pro Internetanschluss).",
+        "data": {
+          "temperature_sensors": "Stationen für Temperatur und Luftfeuchte (höchstens {max_stations})",
+          "wind_sensor": "Station für Wind"
+        },
+        "data_description": {
+          "temperature_sensors": "Eine Station wird direkt verwendet, mehrere werden kombiniert (Median, Ausreißer werden verworfen). Das Maximum ergibt sich aus dem API-Budget.",
+          "wind_sensor": "Wind wird nicht gemittelt, wähle eine Station."
+        }
+      }
+    },
+    "error": {
+      "outside_coverage": "Im Umkreis von 10 km gibt es keine Station.",
+      "no_station_selected": "Wähle mindestens eine Station.",
+      "too_many_stations": "Wähle höchstens 6 Stationen.",
+      "over_budget": "Zu viele API-Abfragen pro Stunde. Wähle weniger Stationen oder in den Optionen ein längeres Aktualisierungsintervall.",
+      "unknown_station": "Eine der gewählten Stationen ist unbekannt. Lade die Seite neu und versuche es erneut."
+    },
+    "abort": {
+      "already_configured": "Dieser Standort ist bereits eingerichtet.",
+      "cannot_connect": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. Versuche es später erneut.",
+      "reconfigure_successful": "Der Standort wurde aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stationen und Einstellungen",
+        "description": "{recommendation}\n\nGeplante API-Abfragen: {planned} pro Stunde bei einem Aktualisierungsintervall von {interval} min (höchstens {budget}; das API-Limit von {api_limit} pro Stunde gilt pro Internetanschluss).\n\nUm Stationen auf der interaktiven Karte zu wählen, nutze *Neu konfigurieren* im Menü der Integration.",
+        "data": {
+          "temperature_sensors": "Stationen für Temperatur und Luftfeuchte (höchstens {max_stations} bei {interval} min)",
+          "wind_sensor": "Station für Wind",
+          "scan_interval": "Aktualisierungsintervall",
+          "dew_point_offset": "Taupunkt-Korrektur"
+        },
+        "data_description": {
+          "temperature_sensors": "Eine Station wird direkt verwendet, mehrere werden kombiniert (Median, Ausreißer werden verworfen). Das Maximum ergibt sich aus dem API-Budget.",
+          "wind_sensor": "Wind wird nicht gemittelt, wähle eine Station.",
+          "scan_interval": "Neue Werte kommen alle 10 Minuten, mit 10–20 Minuten Verzögerung.",
+          "dew_point_offset": "Wird vor der Berechnung der Luftfeuchte auf den Taupunkt addiert. Das Netz misst eher zu feucht; im 31-Tage-Vergleich mit der DWD-Station Mannheim passten −1,3 K."
+        }
+      }
+    },
+    "error": {
+      "no_station_selected": "Wähle mindestens eine Station.",
+      "too_many_stations": "Wähle höchstens 6 Stationen.",
+      "over_budget": "Zu viele API-Abfragen pro Stunde. Wähle weniger Stationen oder ein längeres Aktualisierungsintervall.",
+      "unknown_station": "Eine der gewählten Stationen ist unbekannt. Lade die Seite neu und versuche es erneut."
+    },
+    "abort": {
+      "cannot_connect": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. Versuche es später erneut."
+    }
+  },
+  "selector": {
+    "environment": {
+      "options": {
+        "dense": "Dicht bebaut (geschlossene Innenstadt-Blöcke)",
+        "open_built": "Locker bebaut (Einzel-, Reihenhäuser, Blöcke mit Grün)",
+        "industrial": "Industrie oder große Gewerbebauten",
+        "green": "Grün oder offen (Park, Wald, Felder, Wasser)"
+      }
+    },
+    "environment_short": {
+      "options": {
+        "dense": "dicht bebaut",
+        "open_built": "locker bebaut",
+        "industrial": "Industrie/Gewerbe",
+        "green": "grün/offen"
+      }
+    },
+    "station_flag": {
+      "options": {
+        "elevated": "Dach/Hochpunkt",
+        "recommended": "empfohlen",
+        "wind": "Wind",
+        "no_wind": "keine Windstation"
+      }
+    },
+    "recommendation": {
+      "options": {
+        "nearest_fits": "Die nächste Station **{station}** ({distance}) hat die gleiche Umgebung und wird allein verwendet.",
+        "nearest_too_far": "Die nächste Station **{station}** ist {distance} entfernt. Empfohlen: die Kombination aus {count} Stationen um dich herum.",
+        "nearest_other_environment": "Die nächste Station **{station}** ({distance}) hat eine andere Umgebung ({environment}). Empfohlen: die Kombination aus {count} Stationen, gleiche Umgebung zuerst."
+      }
+    },
+    "map_page": {
+      "options": {
+        "title": "Stationen wählen",
+        "hint": "Klicke auf eine Station, um sie aus- oder abzuwählen. Zoome hinein, wo Stationen dicht beieinander liegen.",
+        "counter": "{count} von höchstens {max} Stationen gewählt",
+        "limit_reached": "Höchstens {max} Stationen passen ins API-Budget. Wähle erst eine ab.",
+        "none_selected": "Wähle mindestens eine Station.",
+        "over_budget": "Diese Auswahl passt nicht ins API-Budget. Wähle weniger Stationen oder keine Windstation.",
+        "budget": "Aktualisierung alle {interval} min · {requests} von {budget} API-Abfragen pro Stunde",
+        "wind": "Station für Wind",
+        "submit": "Speichern",
+        "saving": "Wird gespeichert …",
+        "done": "Gespeichert. Du kannst dieses Fenster schließen, die Einrichtung in Home Assistant geht automatisch weiter.",
+        "error": "Speichern fehlgeschlagen ({error}). Starte die Einrichtung in Home Assistant neu.",
+        "remove": "Entfernen",
+        "elevated": "Dach/Hochpunkt",
+        "legend_selected": "ausgewählt",
+        "legend_recommended": "empfohlen",
+        "legend_other": "weitere Station",
+        "legend_elevated": "Dach oder Hochpunkt",
+        "legend_home": "dein Standort"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "dew_point": {
+        "name": "Taupunkt"
+      },
+      "apparent_temperature": {
+        "name": "Gefühlte Temperatur"
+      },
+      "irradiance": {
+        "name": "Globalstrahlung"
+      },
+      "wind_gust": {
+        "name": "Windböe"
+      },
+      "stations_used": {
+        "name": "Verwendete Stationen"
+      },
+      "temperature_spread": {
+        "name": "Temperatur-Spannweite"
+      },
+      "last_measurement": {
+        "name": "Letzte Messung"
+      }
+    }
+  },
+  "exceptions": {
+    "no_recent_data": {
+      "message": "Keine der gewählten Stationen hat in den letzten 40 Minuten Daten geliefert."
+    },
+    "waiting_for_budget": {
+      "message": "Das Abfrage-Budget der API ist gerade aufgebraucht. Neuer Versuch in {seconds} Sekunden."
+    },
+    "station_list_unavailable": {
+      "message": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden."
+    },
+    "no_stations_available": {
+      "message": "Keine der gewählten Stationen existiert mehr. Wähle in den Optionen der Integration neue Stationen."
+    }
+  },
+  "issues": {
+    "station_offline": {
+      "title": "Station {station} sendet keine Daten",
+      "description": "Die Station {station} von „{entry}“ hat seit 24 Stunden keine Daten geliefert. Die übrigen gewählten Stationen werden weiter verwendet. Bleibt das so, wähle in den Optionen der Integration eine andere Station."
+    },
+    "station_removed": {
+      "title": "Station {station} gibt es nicht mehr",
+      "description": "Die API kennt die Station {station} von „{entry}“ nicht mehr. Wähle in den Optionen der Integration eine andere Station."
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "entity": {
+    "sensor": {
+      "apparent_temperature": {
+        "default": "mdi:thermometer-lines"
+      },
+      "irradiance": {
+        "default": "mdi:white-balance-sunny"
+      },
+      "wind_gust": {
+        "default": "mdi:weather-windy-variant"
+      },
+      "stations_used": {
+        "default": "mdi:map-marker-multiple"
+      },
+      "temperature_spread": {
+        "default": "mdi:arrow-expand-vertical"
+      },
+      "last_measurement": {
+        "default": "mdi:clock-outline"
+      }
+    }
+  }
+}

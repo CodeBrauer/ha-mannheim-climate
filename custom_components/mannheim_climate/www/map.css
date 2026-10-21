@@ -1,0 +1,238 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1c1c1c;
+  --muted: #5f6368;
+  --border: #dadce0;
+  --accent: #0b7dda;
+  --accent-fg: #ffffff;
+  --other: #7a7a7a;
+  --elevated: #e67e22;
+  --home: #db3236;
+  --error: #c5221f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1c;
+    --fg: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #3c4043;
+    --other: #8d8d8d;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  height: 100%;
+}
+
+#map {
+  height: 100%;
+  min-height: 320px;
+}
+
+#panel {
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+  border-left: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+#counter {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+#selected {
+  margin: 8px 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+#selected li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+#selected li .number {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+}
+
+#selected li .text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+#selected li button {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+select,
+button#submit {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+select {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+button#submit {
+  margin-top: 16px;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button#submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#status {
+  min-height: 1.5em;
+}
+
+#status.error {
+  color: var(--error);
+}
+
+#legend {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+#legend li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0;
+}
+
+#legend .station,
+#legend .home {
+  position: static;
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+#legend .home {
+  width: 12px;
+  height: 12px;
+  margin: 0 2px;
+}
+
+.station {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: var(--other);
+  color: #ffffff;
+  font: 600 12px/1 system-ui, sans-serif;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 45%);
+  cursor: pointer;
+}
+
+.station.recommended:not(.selected) {
+  border-color: var(--accent);
+  background: #ffffff;
+  color: var(--accent);
+}
+
+.station.selected {
+  background: var(--accent);
+}
+
+.station.elevated {
+  border-color: var(--elevated);
+}
+
+.station.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.home-marker .home {
+  width: 100%;
+  height: 100%;
+}
+
+.home {
+  box-sizing: border-box;
+  border: 3px solid #ffffff;
+  background: var(--home);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 45%);
+  transform: rotate(45deg);
+}
+
+.leaflet-tooltip .tip-title {
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 55vh auto;
+  }
+
+  #panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
