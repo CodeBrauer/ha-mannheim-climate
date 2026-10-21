@@ -1,0 +1,20 @@
+# Minimal set instead of default_config: several default_config packages
+# (assist pipeline, bluetooth) fail to build or crash on macOS dev machines.
+frontend:
+config:
+history:
+logbook:
+recorder:
+system_health:
+diagnostics:
+repairs:
+
+# https://www.home-assistant.io/integrations/homeassistant/
+homeassistant:
+  debug: true
+
+# https://www.home-assistant.io/integrations/logger/
+logger:
+  default: info
+  logs:
+    custom_components.mannheim_climate: debug

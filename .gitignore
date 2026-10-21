@@ -1,0 +1,25 @@
+# artifacts
+__pycache__
+.pytest*
+*.egg-info
+*/build/*
+*/dist/*
+.venv
+
+# misc
+.coverage
+.vscode
+.idea
+.DS_Store
+coverage.xml
+.ruff_cache
+
+# Home Assistant configuration
+config/*
+!config/configuration.yaml
+
+# reference data build cache
+.cache
+
+# local Claude Code launch config
+.claude/
