@@ -4,6 +4,8 @@
 
 [Deutsch](README.md) · **English**
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+
 Climate values for your location from the dense urban climate network of
 [Smart City Mannheim](https://smartmannheim.de/) (400+ stations): temperature, humidity,
 dew point, absolute humidity, apparent temperature, air pressure, global irradiance and wind.
@@ -58,6 +60,10 @@ Both can be installed side by side but share the API limit per internet connecti
 ## Installation
 
 ### HACS (custom repository)
+
+[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=CodeBrauer&repository=ha-mannheim-climate&category=integration)
+
+Or manually:
 
 1. HACS → ⋮ → *Custom repositories* → add `https://github.com/CodeBrauer/ha-mannheim-climate`
    with type *Integration*.
