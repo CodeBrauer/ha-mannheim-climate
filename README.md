@@ -45,6 +45,22 @@ mehrere Stationen um dich herum.
 - **Diagnose-Download** (Koordinaten geschwärzt).
 - Deutsch und Englisch.
 
+## Verwandte Integration
+
+Für dieselbe Klima-API gibt es auch [Smart City Mannheim](https://github.com/smartmannheim/smartmannheim)
+(Domain `smartmannheim_klima`, in HACS als „Smart City Mannheim“). Dieses Projekt ist
+inoffiziell und unabhängig davon.
+
+| | Klimamessnetz Mannheim (dieses Repo) | Smart City Mannheim |
+|---|---|---|
+| Ansatz | Ein Standort, Werte, die ihn am besten abbilden: passende Station oder Kombination mehrerer | Einzelne Sensoren wählen, Werte pro Station |
+| Stationswahl | Empfehlung nach Entfernung, Umgebung und Montagehöhe; interaktive Karte | Suche nach Sensorcode oder Straße, Liste nach Entfernung |
+| Zusätzliche Werte | Absolute Feuchte, gefühlte Temperatur, Wetter-Entität | Pollenflug, Luftqualität, DWD-Station Mannheim |
+
+Beide lassen sich parallel installieren, teilen sich aber das API-Limit pro
+Internetanschluss (30 Abfragen pro Stunde). Wer beide nutzt, hält die Zahl der Stationen
+entsprechend klein.
+
 ## Installation
 
 ### HACS (benutzerdefiniertes Repository)
