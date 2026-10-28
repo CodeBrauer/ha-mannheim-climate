@@ -17,6 +17,7 @@ ignore = [
 
 [lint.per-file-ignores]
 "scripts/*.py" = ["T201", "INP001"] # CLI build scripts print progress and are not a package
+"tests/*" = ["S101", "PLR2004"] # pytest asserts, expected values written inline
 
 [lint.flake8-pytest-style]
 fixture-parentheses = false

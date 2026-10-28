@@ -148,6 +148,7 @@ The static reference files in `custom_components/mannheim_climate/data/` are gen
 scripts/setup      # creates .venv with Home Assistant (uv)
 scripts/develop    # starts Home Assistant on http://localhost:8123 with this integration
 scripts/lint       # ruff format + check
+scripts/test       # pytest (arguments are passed on, e.g. -k recommend)
 ```
 
 On macOS some Home Assistant core dependencies (`pymicro-vad`, `pyspeex-noise`) have no

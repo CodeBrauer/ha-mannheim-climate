@@ -154,6 +154,7 @@ Die statischen Referenzdateien in `custom_components/mannheim_climate/data/` erz
 scripts/setup      # legt .venv mit Home Assistant an (uv)
 scripts/develop    # startet Home Assistant auf http://localhost:8123 mit dieser Integration
 scripts/lint       # ruff format + check
+scripts/test       # pytest (Argumente werden durchgereicht, z. B. -k recommend)
 ```
 
 Auf macOS gibt es für einige Abhängigkeiten von Home Assistant (`pymicro-vad`,
