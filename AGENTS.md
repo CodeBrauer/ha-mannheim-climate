@@ -39,7 +39,7 @@ Run `scripts/lint` and `scripts/test` before every push. CI runs lint, pytest, h
 
 ## Versioning
 
-[Semantic Versioning](https://semver.org). The version lives only in `manifest.json` (`version`); releases are tagged `vX.Y.Z` with a GitHub release (HACS installs releases).
+[Semantic Versioning](https://semver.org). The version lives only in `manifest.json` (`version`); releases are tagged `vX.Y.Z` with a GitHub release. HACS installs the release asset `mannheim_climate.zip`, which `.github/workflows/release.yml` builds and attaches when a release is published.
 
 For users of an integration, "breaking" means they have to act after updating:
 
