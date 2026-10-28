@@ -9,6 +9,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.mannheim_climate.api import (
+    ApiConnectionError,
     ApiRateLimitError,
     SensorNotFoundError,
 )
@@ -24,6 +25,7 @@ from custom_components.mannheim_climate.coordinator import issue_id
 
 from .common import (
     CATALOG_SENSOR,
+    MEASUREMENT_AGE,
     NEAREST_SENSOR,
     NEAREST_WIND_SENSOR,
     SECOND_SENSOR,
@@ -54,7 +56,7 @@ CACHE_EXPIRED = timedelta(minutes=10)
 
 
 async def set_up(
-    hass: HomeAssistant, api: MagicMock, sensors: list[str]
+    hass: HomeAssistant, api: MagicMock, sensors: list[str], interval: int = 15
 ) -> ClimateCoordinator:
     """Set up a location with these temperature sensors and the wind sensor."""
     api.async_get_measurements.side_effect = respond(VALUES)
@@ -63,7 +65,7 @@ async def set_up(
         **{
             CONF_TEMPERATURE_SENSORS: sensors,
             CONF_WIND_SENSOR: NEAREST_WIND_SENSOR,
-            CONF_SCAN_INTERVAL: 15,
+            CONF_SCAN_INTERVAL: interval,
         },
     )
     assert await hass.config_entries.async_setup(entry.entry_id)
@@ -113,7 +115,7 @@ async def test_deferred_sensors_are_fetched_later(
 async def test_waiting_for_budget_without_any_values(
     hass: HomeAssistant, api: MagicMock, freezer: FrozenDateTimeFactory
 ) -> None:
-    """Rate limited with outdated cache: fail with retry hint, catch up later."""
+    """Rate limited, last values too old: fail with retry hint, catch up later."""
     coordinator = await set_up(hass, api, [NEAREST_SENSOR])
     api.async_get_measurements.side_effect = ApiRateLimitError(60)
     await refresh_after(hass, coordinator, freezer, timedelta(hours=1))
@@ -129,6 +131,25 @@ async def test_waiting_for_budget_without_any_values(
     assert coordinator.last_update_success
 
 
+async def test_last_values_kept_while_waiting_for_budget(
+    hass: HomeAssistant, api: MagicMock, freezer: FrozenDateTimeFactory
+) -> None:
+    """Rate limited with outdated cache: keep the last values, catch up later."""
+    coordinator = await set_up(hass, api, [NEAREST_SENSOR])
+    api.async_get_measurements.side_effect = ApiRateLimitError(60)
+    await refresh_after(hass, coordinator, freezer, timedelta(minutes=35))
+    assert coordinator.last_update_success
+    assert coordinator.data.temperature == 12.0
+
+    api.async_get_measurements.side_effect = respond(
+        {**VALUES, NEAREST_SENSOR: {Field.TEMPERATURE: 11.0}}
+    )
+    freezer.tick(timedelta(seconds=60 + CATCH_UP_MARGIN_S))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert coordinator.data.temperature == 11.0
+
+
 async def test_cached_values_used_while_rate_limited(
     hass: HomeAssistant, api: MagicMock, freezer: FrozenDateTimeFactory
 ) -> None:
@@ -140,14 +161,29 @@ async def test_cached_values_used_while_rate_limited(
     assert coordinator.data.temperature == 12.0
 
 
-async def test_no_recent_data(
-    hass: HomeAssistant, api: MagicMock, freezer: FrozenDateTimeFactory
+@pytest.mark.parametrize(
+    ("interval", "kept_for"),
+    [(15, timedelta(minutes=60)), (30, timedelta(minutes=90))],
+)
+async def test_last_values_kept_without_recent_data(
+    hass: HomeAssistant,
+    api: MagicMock,
+    freezer: FrozenDateTimeFactory,
+    interval: int,
+    kept_for: timedelta,
 ) -> None:
-    """Measurements older than 40 minutes are not used."""
-    coordinator = await set_up(hass, api, [NEAREST_SENSOR])
-    api.async_get_measurements.side_effect = None
-    api.async_get_measurements.return_value = []
-    await refresh_after(hass, coordinator, freezer, CACHE_EXPIRED)
+    """Values stay until they are max(60 min, 3 intervals) old, then unavailable."""
+    coordinator = await set_up(hass, api, [NEAREST_SENSOR], interval)
+    last_measurement = coordinator.data.last_measurement
+    api.async_get_measurements.side_effect = ApiConnectionError("timeout")
+
+    await refresh_after(hass, coordinator, freezer, kept_for - MEASUREMENT_AGE)
+    assert coordinator.last_update_success
+    assert coordinator.data.temperature == 12.0
+    assert coordinator.data.wind_speed == 3.0
+    assert coordinator.data.last_measurement == last_measurement
+
+    await refresh_after(hass, coordinator, freezer, timedelta(seconds=1))
     assert not coordinator.last_update_success
     assert coordinator.last_exception.translation_key == "no_recent_data"
 

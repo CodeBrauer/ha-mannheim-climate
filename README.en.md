@@ -124,7 +124,10 @@ The integration therefore:
   shortly afterwards,
 - plans at most 24 requests per hour for all locations together and picks the update
   interval accordingly (default 15 minutes; values arrive every 10 minutes with
-  10–20 minutes delay anyway).
+  10–20 minutes delay anyway),
+- keeps the last values during a `429` or an API outage until the last measurement is
+  60 minutes old (or three update intervals, if that is longer); only then do the entities
+  become unavailable.
 
 Other scripts or devices that use the API from the same internet connection share the limit.
 
