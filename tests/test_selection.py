@@ -7,20 +7,16 @@ from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.config_entries import ConfigEntryDisabler
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.mannheim_climate.const import (
-    CONF_SCAN_INTERVAL,
     CONF_TEMPERATURE_SENSORS,
-    CONF_WIND_SENSOR,
-    DOMAIN,
     NO_WIND_SENSOR,
     Environment,
 )
 from custom_components.mannheim_climate.hub import requests_per_hour
 from custom_components.mannheim_climate.selection import StationSelection
 
-from .common import HOME, make_station
+from .common import HOME, add_location, make_station
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -32,27 +28,6 @@ STATIONS = [make_station(f"s{i}", 400 + i * 100, wind=i == 0) for i in range(7)]
 def sensor_ids(count: int) -> list[str]:
     """Return the temperature sensor ids of the nearest stations."""
     return [f"s{i}-t" for i in range(count)]
-
-
-def add_location(
-    hass: HomeAssistant,
-    stations: int,
-    interval: int,
-    *,
-    disabled_by: ConfigEntryDisabler | None = None,
-) -> MockConfigEntry:
-    """Add another configured location using stations + 1 wind sensor."""
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        options={
-            CONF_TEMPERATURE_SENSORS: sensor_ids(stations),
-            CONF_WIND_SENSOR: WIND,
-            CONF_SCAN_INTERVAL: interval,
-        },
-        disabled_by=disabled_by,
-    )
-    entry.add_to_hass(hass)
-    return entry
 
 
 def make_selection(

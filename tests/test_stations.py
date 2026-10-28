@@ -4,15 +4,19 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.mannheim_climate.const import Environment, MountZone
+from custom_components.mannheim_climate.api import ApiSensor, parse_sensors
+from custom_components.mannheim_climate.const import Environment, Field, MountZone
+from custom_components.mannheim_climate.reference import load_reference_data
 from custom_components.mannheim_climate.stations import (
+    LczSource,
     Recommendation,
     RecommendationReason,
     Station,
+    build_stations,
     recommend,
 )
 
-from .common import HOME, make_station
+from .common import HOME, LCZ_OPEN_BUILT, make_station, sensors_payload
 
 LCZ_DENSE = 2
 LCZ_GREEN = 14
@@ -154,3 +158,63 @@ def test_no_wind_station_without_wind_sensors() -> None:
     result = recommend_for([make_station("street", 300)])
     assert result is not None
     assert result.wind_station is None
+
+
+# build_stations with the recorded sensor list and the bundled reference data
+
+
+@pytest.fixture(scope="module")
+def stations() -> dict[str, Station]:
+    """Stations around HOME by the name of their temperature (else wind) sensor."""
+    built = build_stations(parse_sensors(sensors_payload()), load_reference_data())
+    return {
+        (station.temperature_sensor or station.wind_sensor).name: station
+        for station in built
+    }
+
+
+def test_sensors_at_one_mast_form_one_station(stations: dict[str, Station]) -> None:
+    """53 sensors: temperature and wind sensors at the same spot are combined."""
+    assert len(stations) == 27
+    station = stations["2507LH096"]
+    assert station.code == "2507LH096"
+    assert station.wind_sensor is not None
+    assert station.wind_sensor.name == "2507LW182"
+
+
+def test_catalogued_station(stations: dict[str, Station]) -> None:
+    """Catalogue stations get their code, LCZ and siting from the catalogue."""
+    station = stations["0101-046-21"]
+    assert station.code == "0101-046"
+    assert (station.lcz, station.lcz_source) == (LCZ_OPEN_BUILT, LczSource.CATALOG)
+    assert (station.zone, station.height_above_ground) == (MountZone.STREET, 0)
+    assert station.district == "Seckenheim"
+
+
+def test_lora_station_uses_lcz_map(stations: dict[str, Station]) -> None:
+    """Stations missing in the catalogue get the LCZ from the map, no siting data."""
+    station = stations["2507LH051"]
+    assert (station.lcz, station.lcz_source) == (LCZ_OPEN_BUILT, LczSource.MAP)
+    assert station.zone is None
+    assert not station.is_elevated
+
+
+def test_newer_temperature_sensor_preferred(stations: dict[str, Station]) -> None:
+    """Two temperature sensors at one mast: the one with more parameters is used."""
+    station = stations["2507LH076"]
+    assert station.wind_sensor is not None
+    assert station.wind_sensor.name == "2306LW049"
+    assert Field.PRESSURE in station.temperature_sensor.parameters
+
+
+def test_wind_only_station(stations: dict[str, Station]) -> None:
+    """A wind sensor without temperature sensor nearby is a station of its own."""
+    station = stations["2304LW088"]
+    assert station.temperature_sensor is None
+    assert station.code == "2304LW088"
+
+
+def test_sensors_without_temperature_or_wind_are_ignored() -> None:
+    """Sensors measuring neither temperature nor wind do not form a station."""
+    pressure = ApiSensor("p1", "p1", *HOME, frozenset({Field.PRESSURE}))
+    assert build_stations([pressure], load_reference_data()) == []
