@@ -94,14 +94,17 @@ git fetch --tags
 
 - `gh release create` creates the tag on GitHub, like v0.1.0.
 - No `--prerelease`: HACS hides prereleases unless users enable beta versions.
+- Publishing starts `.github/workflows/release.yml`, which attaches `mannheim_climate.zip`. HACS installs that asset (`zip_release` in `hacs.json`), so the release cannot be installed until the workflow has succeeded.
 
 ## 7. Verify and follow up
 
 ```bash
-gh release view vX.Y.Z
+gh run watch "$(gh run list --workflow release.yml --limit 1 --json databaseId --jq '.[0].databaseId')" --exit-status
+gh release view vX.Y.Z --json assets --jq '.assets[].name'   # must list mannheim_climate.zip
 git show vX.Y.Z:custom_components/mannheim_climate/manifest.json | jq -r .version
 gh api 'repos/{owner}/{repo}/milestones' --jq '.[] | "\(.number) \(.title) open=\(.open_issues)"'
 ```
 
+- If the workflow failed, re-run it (`gh run rerun <id>`); it replaces an existing asset. A re-run uses the workflow file of the tag, so a broken workflow needs a fix on `main` and a new PATCH release.
 - If a milestone with this version exists and has no open issues left, close it with `gh api -X PATCH 'repos/{owner}/{repo}/milestones/<number>' -f state=closed`. This is covered by the approval in step 4.
 - Never delete, move or re-tag a published version; HACS installations may already use it. Fix mistakes with a new PATCH release.
