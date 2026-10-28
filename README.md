@@ -171,6 +171,12 @@ Referenzdaten neu erzeugen (selten nötig, z. B. nach einem neuen Metadatenkatal
 uv run --no-project --with openpyxl --with rasterio python scripts/build_reference_data.py
 ```
 
+## Unterstützen
+
+Wenn dir die Integration gefällt, kannst du mir ein Bier ausgeben:
+
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=codebrauer&button_colour=ffe500&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00)](https://buymeacoffee.com/codebrauer)
+
 ## Lizenz
 
 MIT, siehe [LICENSE](LICENSE).

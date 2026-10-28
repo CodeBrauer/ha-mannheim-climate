@@ -164,6 +164,12 @@ Regenerate the reference data (rarely needed, e.g. after a new metadata catalogu
 uv run --no-project --with openpyxl --with rasterio python scripts/build_reference_data.py
 ```
 
+## Support
+
+If you like the integration, you can buy me a beer:
+
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=codebrauer&button_colour=ffe500&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00)](https://buymeacoffee.com/codebrauer)
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
