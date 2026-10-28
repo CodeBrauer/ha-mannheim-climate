@@ -21,6 +21,8 @@ from .const import (
     DEFAULT_DEW_POINT_OFFSET_K,
     DEFAULT_SCAN_INTERVAL_MIN,
     DOMAIN,
+    KEEP_VALUES_INTERVALS,
+    KEEP_VALUES_MIN_AGE,
     LOGGER,
     MAX_MEASUREMENT_AGE,
     STATION_OFFLINE_AFTER,
@@ -59,14 +61,18 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         wind_station: Station | None,
     ) -> None:
         """Remember the stations; offline detection starts counting now."""
+        interval = timedelta(
+            minutes=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN)
+        )
         super().__init__(
             hass,
             LOGGER,
             config_entry=entry,
             name=f"{DOMAIN}_{entry.title}",
-            update_interval=timedelta(
-                minutes=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN)
-            ),
+            update_interval=interval,
+        )
+        self._keep_values_for = max(
+            KEEP_VALUES_MIN_AGE, KEEP_VALUES_INTERVALS * interval
         )
         self.hub = hub
         self.stations = stations
@@ -122,6 +128,11 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
 
         if self._deferred_wait:
             self._schedule_catch_up(self._deferred_wait)
+        if not readings and self._last_values_recent(now):
+            LOGGER.debug(
+                "No recent data, keeping the values of %s", self.data.last_measurement
+            )
+            return self.data
         if not readings and self._deferred_wait:
             raise UpdateFailed(
                 translation_domain=DOMAIN,
@@ -138,6 +149,11 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
                 "%s of %s stations without recent data", failed, len(self.stations)
             )
         return estimate(readings, wind, self._dew_point_offset)
+
+    def _last_values_recent(self, now: datetime) -> bool:
+        """Return True while the last estimate may stand in for missing data."""
+        last = self.data.last_measurement if self.data else None
+        return last is not None and now - last <= self._keep_values_for
 
     async def _async_latest(
         self, station: Station, sensor: ApiSensor, now: datetime

@@ -129,7 +129,10 @@ Die Integration
   Stationen kurz danach nach,
 - plant für alle Standorte zusammen höchstens 24 Abfragen pro Stunde und wählt das
   Aktualisierungsintervall entsprechend (Standard 15 Minuten; neue Werte kommen ohnehin
-  nur alle 10 Minuten mit 10–20 Minuten Verzögerung).
+  nur alle 10 Minuten mit 10–20 Minuten Verzögerung),
+- behält bei einem `429` oder API-Ausfall die letzten Werte, bis die letzte Messung
+  60 Minuten (bzw. drei Aktualisierungsintervalle, wenn das länger ist) alt ist; erst dann
+  werden die Entitäten nicht verfügbar.
 
 Andere Skripte oder Geräte, die die API über denselben Internetanschluss nutzen, teilen
 sich das Limit.
