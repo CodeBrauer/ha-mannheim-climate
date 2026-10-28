@@ -4,30 +4,41 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
+from homeassistant.util import dt as dt_util
 
-from custom_components.mannheim_climate.api import ApiRateLimitError, Measurement
-from custom_components.mannheim_climate.const import MEASUREMENT_LIMITS, Field
+from custom_components.mannheim_climate.api import (
+    ApiConnectionError,
+    ApiRateLimitError,
+    Measurement,
+)
+from custom_components.mannheim_climate.const import (
+    MEASUREMENT_LIMITS,
+    STORAGE_KEY,
+    STORAGE_VERSION,
+)
 from custom_components.mannheim_climate.hub import (
     ClimateHub,
     RateLimiter,
     RequestDeferredError,
+    StationListUnavailableError,
+    async_get_hub,
 )
 
+from .common import MEASUREMENTS, NEAREST_WIND_SENSOR, sensors_payload
+
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from typing import Any
 
     from freezegun.api import FrozenDateTimeFactory
     from homeassistant.core import HomeAssistant
 
-MEASUREMENTS = [
-    Measurement(datetime(2026, 10, 26, 12, 0, tzinfo=UTC), {Field.TEMPERATURE: 12.3})
-]
 RATE_LIMIT_WARNING = "rate limit was hit"
+STATIONS_IN_FIXTURE = 27
 
 
 # RateLimiter (4 requests per 2 minutes, 30 per hour)
@@ -75,17 +86,6 @@ def test_rate_limiter_blocks_after_rate_limit(freezer: FrozenDateTimeFactory) ->
 
 
 # ClimateHub
-
-
-@pytest.fixture
-def api() -> Generator[MagicMock]:
-    """Replace the API client created by the hub."""
-    with patch(
-        "custom_components.mannheim_climate.hub.MannheimClimateApi", autospec=True
-    ) as api_class:
-        client = api_class.return_value
-        client.async_get_measurements.return_value = MEASUREMENTS
-        yield client
 
 
 @pytest.fixture
@@ -188,3 +188,98 @@ async def test_concurrent_requests_for_one_sensor_share_the_response(
     )
     assert results == [MEASUREMENTS, MEASUREMENTS]
     assert api.async_get_measurements.await_count == 1
+
+
+# Station list (refreshed once a day, stored copy as fallback)
+
+
+def store_sensor_list(hass_storage: dict[str, Any], age: timedelta) -> None:
+    """Put a sensor list fetched `age` ago into the mocked storage."""
+    hass_storage[STORAGE_KEY] = {
+        "version": STORAGE_VERSION,
+        "minor_version": 1,
+        "key": STORAGE_KEY,
+        "data": {
+            "fetched_at": (dt_util.utcnow() - age).isoformat(),
+            "payload": sensors_payload(),
+        },
+    }
+
+
+async def test_station_list_fetched_once_a_day(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    api: MagicMock,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """The list is fetched, stored and kept for 24 hours."""
+    hub = await async_get_hub(hass)
+    stations = await hub.async_get_stations()
+    assert len(stations) == STATIONS_IN_FIXTURE
+    assert hub.station_for_sensor(NEAREST_WIND_SENSOR).code == "2507LH096"
+    assert hass_storage[STORAGE_KEY]["data"]["payload"] == sensors_payload()
+
+    freezer.tick(timedelta(hours=23, minutes=59))
+    assert await hub.async_get_stations() is stations
+    assert api.async_get_sensors_payload.await_count == 1
+    freezer.tick(timedelta(minutes=1))
+    await hub.async_get_stations()
+    assert api.async_get_sensors_payload.await_count == 2
+
+
+async def test_fresh_stored_station_list_used_without_request(
+    hass: HomeAssistant, hass_storage: dict[str, Any], api: MagicMock
+) -> None:
+    """After a restart, a list stored less than a day ago is used as is."""
+    store_sensor_list(hass_storage, timedelta(hours=23))
+    hub = await async_get_hub(hass)
+    assert len(await hub.async_get_stations()) == STATIONS_IN_FIXTURE
+    api.async_get_sensors_payload.assert_not_awaited()
+
+
+async def test_old_stored_station_list_used_when_api_fails(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    api: MagicMock,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """An outdated stored list is better than none."""
+    store_sensor_list(hass_storage, timedelta(days=3))
+    api.async_get_sensors_payload.side_effect = ApiConnectionError("timeout")
+    hub = await async_get_hub(hass)
+    assert len(await hub.async_get_stations()) == STATIONS_IN_FIXTURE
+    assert "Could not refresh the station list" in caplog.text
+
+
+async def test_station_list_unavailable_without_api_and_store(
+    hass: HomeAssistant, api: MagicMock
+) -> None:
+    """Without a stored copy an API failure makes the list unavailable."""
+    api.async_get_sensors_payload.side_effect = ApiConnectionError("timeout")
+    hub = await async_get_hub(hass)
+    with pytest.raises(StationListUnavailableError):
+        await hub.async_get_stations()
+
+
+async def test_station_list_rate_limit_blocks_further_requests(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    api: MagicMock,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """After a 429 the stored copy is used until Retry-After has passed."""
+    store_sensor_list(hass_storage, timedelta(days=3))
+    api.async_get_sensors_payload.side_effect = ApiRateLimitError(900)
+    hub = await async_get_hub(hass)
+    await hub.async_get_stations()
+    freezer.tick(timedelta(minutes=14))
+    await hub.async_get_stations()
+    assert api.async_get_sensors_payload.await_count == 1, "blocked: no request sent"
+
+    api.async_get_sensors_payload.side_effect = None
+    freezer.tick(timedelta(minutes=1))
+    await hub.async_get_stations()
+    assert api.async_get_sensors_payload.await_count == 2
+    assert hass_storage[STORAGE_KEY]["data"]["fetched_at"] == (
+        dt_util.utcnow().isoformat()
+    )
