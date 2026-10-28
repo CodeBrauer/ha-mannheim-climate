@@ -21,5 +21,6 @@ config/*
 # reference data build cache
 .cache
 
-# local Claude Code launch config
-.claude/
+# local Claude Code config; skills are shared
+.claude/*
+!.claude/skills/
