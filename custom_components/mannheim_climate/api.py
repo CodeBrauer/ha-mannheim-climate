@@ -14,6 +14,7 @@ from .const import API_BASE_URL, DEFAULT_RETRY_AFTER_S, LOGGER, REQUEST_TIMEOUT_
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+HTTP_BAD_REQUEST = 400
 HTTP_NOT_FOUND = 404
 HTTP_TOO_MANY_REQUESTS = 429
 POSITION_LENGTH = 2
@@ -159,7 +160,7 @@ class MannheimClimateApi:
                     raise ApiRateLimitError(_retry_after(response.headers))
                 if response.status == HTTP_NOT_FOUND:
                     raise SensorNotFoundError(path)
-                if not response.ok:
+                if response.status >= HTTP_BAD_REQUEST:
                     msg = f"HTTP {response.status} for {path}"
                     raise ApiError(msg)
                 return await response.json(content_type=None)
