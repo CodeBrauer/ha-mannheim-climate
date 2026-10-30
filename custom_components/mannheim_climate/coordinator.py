@@ -18,6 +18,8 @@ from .const import (
     CATCH_UP_MARGIN_S,
     CONF_DEW_POINT_OFFSET,
     CONF_SCAN_INTERVAL,
+    CONF_TEMPERATURE_SENSORS,
+    CONF_WIND_SENSOR,
     DEFAULT_DEW_POINT_OFFSET_K,
     DEFAULT_SCAN_INTERVAL_MIN,
     DOMAIN,
@@ -105,6 +107,18 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         """Distance from the configured location to a station in metres."""
         return station.distance_to(self._latitude, self._longitude)
 
+    async def _async_setup(self) -> None:
+        """Report selected sensors that are no longer in the station list."""
+        options = self.config_entry.options
+        selected = [
+            *options.get(CONF_TEMPERATURE_SENSORS, []),
+            options.get(CONF_WIND_SENSOR),
+        ]
+        for sensor_id in selected:
+            if sensor_id and self.hub.station_for_sensor(sensor_id) is None:
+                # The old station name is gone with the list, only the id is left.
+                self._set_issue("station_removed", sensor_id, sensor_id, active=True)
+
     async def _async_update_data(self) -> Estimate:
         now = dt_util.utcnow()
         self._deferred_wait = 0.0
@@ -158,6 +172,7 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
     async def _async_latest(
         self, station: Station, sensor: ApiSensor, now: datetime
     ) -> Measurement | None:
+        label = f"{station.label} / {sensor.name}"
         try:
             measurements = await self.hub.async_get_measurements(sensor.id)
         except RequestDeferredError as err:
@@ -165,7 +180,7 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
             self._deferred_wait = max(self._deferred_wait, err.wait)
             measurements = self.hub.cached_measurements(sensor.id)
         except SensorNotFoundError:
-            self._set_issue("station_removed", station, sensor, active=True)
+            self._set_issue("station_removed", sensor.id, label, active=True)
             return None
         except ApiError as err:
             LOGGER.debug("Fetching %s failed: %s", sensor.name, err)
@@ -174,8 +189,8 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         if latest:
             self._last_seen[sensor.id] = now
         offline = now - self._last_seen[sensor.id] > STATION_OFFLINE_AFTER
-        self._set_issue("station_offline", station, sensor, active=offline)
-        self._set_issue("station_removed", station, sensor, active=False)
+        self._set_issue("station_offline", sensor.id, label, active=offline)
+        self._set_issue("station_removed", sensor.id, label, active=False)
         return latest
 
     def _schedule_catch_up(self, wait: float) -> None:
@@ -199,9 +214,9 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         await super().async_shutdown()
 
     def _set_issue(
-        self, kind: str, station: Station, sensor: ApiSensor, *, active: bool
+        self, kind: str, sensor_id: str, label: str, *, active: bool
     ) -> None:
-        issue = issue_id(self.config_entry.entry_id, kind, sensor.id)
+        issue = issue_id(self.config_entry.entry_id, kind, sensor_id)
         if not active:
             ir.async_delete_issue(self.hass, DOMAIN, issue)
             return
@@ -213,7 +228,7 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
             severity=ir.IssueSeverity.WARNING,
             translation_key=kind,
             translation_placeholders={
-                "station": f"{station.label} / {sensor.name}",
+                "station": label,
                 "entry": self.config_entry.title,
             },
         )

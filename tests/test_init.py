@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from homeassistant.config_entries import ConfigEntryState
@@ -131,6 +131,31 @@ async def test_setup_fails_when_no_selected_station_exists(
     await hass.config_entries.async_setup(entry.entry_id)
     assert entry.state is ConfigEntryState.SETUP_ERROR
     api.async_get_measurements.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {CONF_TEMPERATURE_SENSORS: [NEAREST_SENSOR, "removed"]},
+        {CONF_TEMPERATURE_SENSORS: [NEAREST_SENSOR], CONF_WIND_SENSOR: "removed"},
+    ],
+    ids=["temperature", "wind"],
+)
+async def test_setup_reports_sensor_missing_from_station_list(
+    hass: HomeAssistant,
+    api: MagicMock,
+    issue_registry: ir.IssueRegistry,
+    options: dict[str, Any],
+) -> None:
+    """A selected sensor the station list no longer has raises a repair issue."""
+    api.async_get_measurements.side_effect = respond(VALUES)
+    entry = add_home_entry(hass, **options)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    assert entry.state is ConfigEntryState.LOADED
+    issue = issue_registry.async_get_issue(
+        DOMAIN, issue_id(entry.entry_id, "station_removed", "removed")
+    )
+    assert issue is not None, "removed sensor dropped without a repair issue"
 
 
 async def test_setup_retried_without_recent_data(
