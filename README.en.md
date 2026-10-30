@@ -37,7 +37,8 @@ stations around you instead.
   the network has no cloud or rain sensors, so it stays unknown at night.
 - **Respects the API limits** (shared request budget and cache across all locations).
 - **Several locations** (home, work, ...), each as its own device.
-- **Repairs** when a selected station stops delivering data or disappears.
+- **Repairs** when a selected station stops delivering data or disappears, with a
+  replacement you can apply directly.
 - **Reconfigure** to move a location, **options** to change stations, update interval and
   a dew point correction.
 - **Diagnostics** download (coordinates redacted).
@@ -131,6 +132,32 @@ The integration therefore:
   become unavailable.
 
 Other scripts or devices that use the API from the same internet connection share the limit.
+
+## When data stops
+
+- If a selected station delivers no data for 24 hours or the API no longer knows it, a
+  repair issue appears. *Fix* lets you use the recommendation without this station or
+  choose from a list.
+- During an API outage the last values stay (see above), then the entities become
+  unavailable. There is no repair issue for this, because there is nothing you can fix.
+
+Automations that use the temperature can react to an outage, for example with a push
+notification to your phone. Adjust the entity and the notification service to your
+installation:
+
+```yaml
+alias: "Klimamessnetz: no temperature"
+triggers:
+  - trigger: state
+    entity_id: sensor.seckenheim_temperature
+    to: unavailable
+    for:
+      minutes: 30
+actions:
+  - action: notify.mobile_app_my_phone
+    data:
+      message: No temperature from Klimamessnetz Mannheim for 30 minutes.
+```
 
 ## Data sources and licences
 
