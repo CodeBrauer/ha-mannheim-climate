@@ -30,7 +30,8 @@ stations around you instead.
 - **Sensors**: temperature, humidity, dew point, absolute humidity, apparent temperature,
   air pressure*, global irradiance*, wind speed, gust and direction (*if the selected
   stations measure it), plus diagnostic sensors (stations used, temperature spread, last
-  measurement).
+  measurement). Disabled by default: minimum and maximum temperature of the last
+  10-minute interval and the gust direction.
 - **Weather entity** with all current values. The condition (sunny / partly cloudy /
   cloudy) is estimated from irradiance during the day when at least 3 stations deliver it;
   the network has no cloud or rain sensors, so it stays unknown at night.

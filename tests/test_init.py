@@ -35,9 +35,22 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 VALUES = {
-    NEAREST_SENSOR: {Field.TEMPERATURE: 12.0},
-    SECOND_SENSOR: {Field.TEMPERATURE: 13.0},
-    NEAREST_WIND_SENSOR: {Field.WIND_SPEED: 3.0},
+    NEAREST_SENSOR: {
+        Field.TEMPERATURE: 12.0,
+        Field.MIN_TEMPERATURE: 11.0,
+        Field.MAX_TEMPERATURE: 12.5,
+    },
+    SECOND_SENSOR: {
+        Field.TEMPERATURE: 13.0,
+        Field.MIN_TEMPERATURE: 12.0,
+        Field.MAX_TEMPERATURE: 13.5,
+    },
+    NEAREST_WIND_SENSOR: {Field.WIND_SPEED: 3.0, Field.WIND_GUST_DIRECTION: 250.0},
+}
+OPTIONAL_SENSORS = {
+    "min_temperature": "11.5",
+    "max_temperature": "13.0",
+    "wind_gust_direction": "250.0",
 }
 
 
@@ -69,6 +82,36 @@ async def test_setup_and_unload(
 
     assert await hass.config_entries.async_unload(entry.entry_id)
     assert entry.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_optional_sensors_disabled_by_default(
+    hass: HomeAssistant, entry: MockConfigEntry, entity_registry: er.EntityRegistry
+) -> None:
+    """Minimum, maximum and gust direction are created, but disabled."""
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    for key in OPTIONAL_SENSORS:
+        entity_id = entity_registry.async_get_entity_id(
+            "sensor", DOMAIN, f"{entry.entry_id}_{key}"
+        )
+        assert entity_id is not None, f"{key} sensor not created"
+        registered = entity_registry.async_get(entity_id)
+        assert registered.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+        assert hass.states.get(entity_id) is None
+
+
+async def test_optional_sensor_values(
+    hass: HomeAssistant, entry: MockConfigEntry, entity_registry: er.EntityRegistry
+) -> None:
+    """Enabled, they show the median minimum/maximum and the wind station's value."""
+    enabled = {
+        key: entity_registry.async_get_or_create(
+            "sensor", DOMAIN, f"{entry.entry_id}_{key}", config_entry=entry
+        ).entity_id
+        for key in OPTIONAL_SENSORS
+    }
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    for key, expected in OPTIONAL_SENSORS.items():
+        assert hass.states.get(enabled[key]).state == expected, key
 
 
 async def test_setup_retried_without_station_list(

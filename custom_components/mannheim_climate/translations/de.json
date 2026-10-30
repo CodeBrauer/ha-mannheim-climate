@@ -151,6 +151,12 @@
   },
   "entity": {
     "sensor": {
+      "min_temperature": {
+        "name": "Temperatur (Minimum)"
+      },
+      "max_temperature": {
+        "name": "Temperatur (Maximum)"
+      },
       "dew_point": {
         "name": "Taupunkt"
       },
@@ -162,6 +168,9 @@
       },
       "wind_gust": {
         "name": "Windböe"
+      },
+      "wind_gust_direction": {
+        "name": "Böenrichtung"
       },
       "stations_used": {
         "name": "Verwendete Stationen"
