@@ -33,7 +33,8 @@ mehrere Stationen um dich herum.
 - **Sensoren**: Temperatur, Luftfeuchte, Taupunkt, absolute Feuchte, gefühlte Temperatur,
   Luftdruck\*, Globalstrahlung\*, Windgeschwindigkeit, Böe und Windrichtung (\*wenn die
   gewählten Stationen sie messen), dazu Diagnose-Sensoren (verwendete Stationen,
-  Temperatur-Spannweite, letzte Messung).
+  Temperatur-Spannweite, letzte Messung). Standardmäßig deaktiviert: Minimum und Maximum
+  der Temperatur im letzten 10-Minuten-Intervall und die Böenrichtung.
 - **Wetter-Entität** mit allen aktuellen Werten. Der Zustand (sonnig / teilweise bewölkt /
   bewölkt) wird tagsüber aus der Globalstrahlung geschätzt, wenn mindestens 3 Stationen sie
   liefern. Das Netz hat keine Wolken- oder Regensensoren, nachts bleibt der Zustand daher

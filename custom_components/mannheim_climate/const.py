@@ -127,6 +127,8 @@ class Field(StrEnum):
     """Measurement fields delivered by the API."""
 
     TEMPERATURE = "temperature"
+    MIN_TEMPERATURE = "minTemperature"
+    MAX_TEMPERATURE = "maxTemperature"
     HUMIDITY = "airHumidity"
     DEW_POINT = "dewPoint"
     PRESSURE = "atmosphericPressure"
@@ -135,3 +137,4 @@ class Field(StrEnum):
     WIND_GUST = "windGust3s"
     WIND_GUST_1S = "windGust1s"
     WIND_DIRECTION = "averageWindDirection"
+    WIND_GUST_DIRECTION = "windGustDirection"

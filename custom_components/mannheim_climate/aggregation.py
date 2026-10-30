@@ -28,6 +28,8 @@ MAX_HUMIDITY = 100.0
 
 PLAUSIBLE_RANGES: dict[Field, tuple[float, float]] = {
     Field.TEMPERATURE: (-30.0, 45.0),
+    Field.MIN_TEMPERATURE: (-30.0, 45.0),
+    Field.MAX_TEMPERATURE: (-30.0, 45.0),
     Field.HUMIDITY: (1.0, 100.0),
     Field.PRESSURE: (850.0, 1100.0),
     Field.IRRADIANCE: (0.0, 1500.0),
@@ -35,6 +37,7 @@ PLAUSIBLE_RANGES: dict[Field, tuple[float, float]] = {
     Field.WIND_GUST: (0.0, 80.0),
     Field.WIND_GUST_1S: (0.0, 80.0),
     Field.WIND_DIRECTION: (0.0, 360.0),
+    Field.WIND_GUST_DIRECTION: (0.0, 360.0),
 }
 
 
@@ -118,6 +121,8 @@ class Estimate:
     """Combined values for the configured location."""
 
     temperature: float | None = None
+    min_temperature: float | None = None
+    max_temperature: float | None = None
     humidity: float | None = None
     dew_point: float | None = None
     humidity_uncorrected: float | None = None
@@ -129,6 +134,7 @@ class Estimate:
     wind_speed: float | None = None
     wind_gust: float | None = None
     wind_direction: float | None = None
+    wind_gust_direction: float | None = None
     spread: float | None = None
     last_measurement: datetime | None = None
     used: list[StationReading] = field(default_factory=list)
@@ -176,6 +182,8 @@ def estimate(
         temperatures = [r.get(Field.TEMPERATURE) for r in used]
         result.temperature = statistics.median(temperatures)
         result.spread = max(temperatures) - min(temperatures)
+        result.min_temperature = _median(used, Field.MIN_TEMPERATURE)
+        result.max_temperature = _median(used, Field.MAX_TEMPERATURE)
         result.last_measurement = max(r.measurement.timestamp for r in used)
         dew_points = [
             dew_point(r.get(Field.TEMPERATURE), humidity)
@@ -206,6 +214,7 @@ def estimate(
             Field.WIND_GUST, wind.values.get(Field.WIND_GUST_1S)
         )
         result.wind_direction = wind.values.get(Field.WIND_DIRECTION)
+        result.wind_gust_direction = wind.values.get(Field.WIND_GUST_DIRECTION)
 
     if (
         result.temperature is not None

@@ -111,6 +111,18 @@ def test_latest_valid_rejects_measurements_older_than_max_age() -> None:
             {Field.TEMPERATURE: 45.0, Field.WIND_DIRECTION: 360.0},
         ),
         ({Field.TEMPERATURE: -30.1, Field.PRESSURE: 1013.0}, {Field.PRESSURE: 1013.0}),
+        (
+            {
+                Field.TEMPERATURE: 12.0,
+                Field.MIN_TEMPERATURE: -999.0,
+                Field.MAX_TEMPERATURE: 45.1,
+            },
+            {Field.TEMPERATURE: 12.0},
+        ),
+        (
+            {Field.WIND_DIRECTION: 0.0, Field.WIND_GUST_DIRECTION: 360.1},
+            {Field.WIND_DIRECTION: 0.0},
+        ),
         # Fields without a known range are kept as delivered.
         ({"precipitationTick": 3.0}, {"precipitationTick": 3.0}),
     ],
@@ -265,16 +277,50 @@ def test_estimate_irradiance_maximum_and_pressure_median() -> None:
     assert result.pressure == 1010.0
 
 
+def test_estimate_min_max_temperature_median_without_outliers() -> None:
+    """Minimum and maximum are medians of the used stations, outliers don't count."""
+
+    def reading(code: str, temperature: float) -> StationReading:
+        return make_reading(
+            code,
+            temperature,
+            extra={
+                Field.MIN_TEMPERATURE: temperature - 1,
+                Field.MAX_TEMPERATURE: temperature + 1,
+            },
+        )
+
+    readings = [reading("a", 10.0), reading("b", 10.5), reading("c", 11.0)]
+    readings += [reading("outlier", 20.0), make_reading("no_min_max", 10.5)]
+    result = estimate(readings, None, 0.0)
+    assert [r.code for r in result.dropped] == ["outlier"]
+    assert result.min_temperature == 9.5
+    assert result.max_temperature == 11.5
+
+
+def test_estimate_without_min_max_temperature() -> None:
+    """Stations that don't measure minimum and maximum leave them empty."""
+    result = estimate([make_reading("a", 20.0)], None, 0.0)
+    assert result.min_temperature is None
+    assert result.max_temperature is None
+
+
 def test_estimate_wind_values() -> None:
     """Wind comes from the wind station and enables the apparent temperature."""
     wind = Measurement(
         NOW,
-        {Field.WIND_SPEED: 3.0, Field.WIND_GUST: 7.0, Field.WIND_DIRECTION: 270.0},
+        {
+            Field.WIND_SPEED: 3.0,
+            Field.WIND_GUST: 7.0,
+            Field.WIND_DIRECTION: 270.0,
+            Field.WIND_GUST_DIRECTION: 250.0,
+        },
     )
     result = estimate([make_reading("a", 20.0, 50.0)], wind, 0.0)
     assert result.wind_speed == 3.0
     assert result.wind_gust == 7.0
     assert result.wind_direction == 270.0
+    assert result.wind_gust_direction == 250.0
     assert result.apparent_temperature == pytest.approx(
         apparent_temperature(20.0, result.humidity, 3.0)
     )
