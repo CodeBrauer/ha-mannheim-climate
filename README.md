@@ -42,7 +42,7 @@ mehrere Stationen um dich herum.
 - **Hält die API-Limits ein** (gemeinsames Abfrage-Budget und Cache für alle Standorte).
 - **Mehrere Standorte** (Zuhause, Arbeit, …), jeder als eigenes Gerät.
 - **Reparaturhinweise**, wenn eine gewählte Station keine Daten mehr liefert oder
-  verschwindet.
+  verschwindet, mit Ersatzvorschlag zum direkten Übernehmen.
 - **Neu konfigurieren**, um einen Standort zu verschieben, **Optionen** für Stationen,
   Aktualisierungsintervall und eine Taupunkt-Korrektur.
 - **Diagnose-Download** (Koordinaten geschwärzt).
@@ -137,6 +137,33 @@ Die Integration
 
 Andere Skripte oder Geräte, die die API über denselben Internetanschluss nutzen, teilen
 sich das Limit.
+
+## Wenn keine Daten mehr kommen
+
+- Liefert eine gewählte Station 24 Stunden lang keine Daten oder kennt die API sie nicht
+  mehr, erscheint ein Reparaturhinweis. Über *Beheben* übernimmst du die Empfehlung ohne
+  diese Station oder wählst selbst aus einer Liste.
+- Fällt die API aus, bleiben die letzten Werte stehen (siehe oben), danach werden die
+  Entitäten nicht verfügbar. Dafür gibt es keinen Reparaturhinweis, weil du nichts beheben
+  kannst.
+
+Automationen, die die Temperatur verwenden, können auf den Ausfall reagieren, zum Beispiel
+mit einer Push-Nachricht aufs Handy. Entität und Benachrichtigungsdienst passt du an deine
+Installation an:
+
+```yaml
+alias: "Klimamessnetz: keine Temperatur"
+triggers:
+  - trigger: state
+    entity_id: sensor.seckenheim_temperatur
+    to: unavailable
+    for:
+      minutes: 30
+actions:
+  - action: notify.mobile_app_mein_handy
+    data:
+      message: Seit 30 Minuten keine Temperatur vom Klimamessnetz Mannheim.
+```
 
 ## Datenquellen und Lizenzen
 

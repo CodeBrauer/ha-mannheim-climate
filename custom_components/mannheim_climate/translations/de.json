@@ -200,11 +200,77 @@
   "issues": {
     "station_offline": {
       "title": "Station {station} sendet keine Daten",
-      "description": "Die Station {station} von „{entry}“ hat seit 24 Stunden keine Daten geliefert. Die übrigen gewählten Stationen werden weiter verwendet. Bleibt das so, wähle in den Optionen der Integration eine andere Station."
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Station {station} sendet keine Daten",
+            "description": "Die Station {station} von „{entry}“ hat seit 24 Stunden keine Daten geliefert. Die übrigen gewählten Stationen werden weiter verwendet.\n\nOhne diese Station: {recommendation}\n\n{recommended_list}\n\nMit der Empfehlung wird alle {interval} min aktualisiert ({planned} von höchstens {budget} API-Abfragen pro Stunde).",
+            "menu_options": {
+              "accept": "Empfehlung übernehmen",
+              "list": "Aus einer Liste auswählen"
+            }
+          },
+          "list": {
+            "title": "Stationen",
+            "description": "{recommendation}\n\nDie bisherigen Stationen sind vorausgewählt, ohne die ausgefallene. Geplante API-Abfragen: {planned} pro Stunde bei einem Aktualisierungsintervall von {interval} min (höchstens {budget}; das API-Limit von {api_limit} pro Stunde gilt pro Internetanschluss).",
+            "data": {
+              "temperature_sensors": "Stationen für Temperatur und Luftfeuchte (höchstens {max_stations})",
+              "wind_sensor": "Station für Wind"
+            },
+            "data_description": {
+              "temperature_sensors": "Eine Station wird direkt verwendet, mehrere werden kombiniert (Median, Ausreißer werden verworfen). Das Maximum ergibt sich aus dem API-Budget.",
+              "wind_sensor": "Wind wird nicht gemittelt, wähle eine Station."
+            }
+          }
+        },
+        "error": {
+          "no_station_selected": "Wähle mindestens eine Station.",
+          "too_many_stations": "Wähle höchstens 6 Stationen.",
+          "over_budget": "Zu viele API-Abfragen pro Stunde. Wähle weniger Stationen oder ein längeres Aktualisierungsintervall.",
+          "unknown_station": "Eine der gewählten Stationen ist unbekannt. Lade die Seite neu und versuche es erneut."
+        },
+        "abort": {
+          "cannot_connect": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. Versuche es später erneut.",
+          "entry_not_found": "Den Standort gibt es nicht mehr."
+        }
+      }
     },
     "station_removed": {
       "title": "Station {station} gibt es nicht mehr",
-      "description": "Die API kennt die Station {station} von „{entry}“ nicht mehr. Wähle in den Optionen der Integration eine andere Station."
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Station {station} gibt es nicht mehr",
+            "description": "Die API kennt die Station {station} von „{entry}“ nicht mehr.\n\nOhne diese Station: {recommendation}\n\n{recommended_list}\n\nMit der Empfehlung wird alle {interval} min aktualisiert ({planned} von höchstens {budget} API-Abfragen pro Stunde).",
+            "menu_options": {
+              "accept": "Empfehlung übernehmen",
+              "list": "Aus einer Liste auswählen"
+            }
+          },
+          "list": {
+            "title": "Stationen",
+            "description": "{recommendation}\n\nDie bisherigen Stationen sind vorausgewählt, ohne die entfernte. Geplante API-Abfragen: {planned} pro Stunde bei einem Aktualisierungsintervall von {interval} min (höchstens {budget}; das API-Limit von {api_limit} pro Stunde gilt pro Internetanschluss).",
+            "data": {
+              "temperature_sensors": "Stationen für Temperatur und Luftfeuchte (höchstens {max_stations})",
+              "wind_sensor": "Station für Wind"
+            },
+            "data_description": {
+              "temperature_sensors": "Eine Station wird direkt verwendet, mehrere werden kombiniert (Median, Ausreißer werden verworfen). Das Maximum ergibt sich aus dem API-Budget.",
+              "wind_sensor": "Wind wird nicht gemittelt, wähle eine Station."
+            }
+          }
+        },
+        "error": {
+          "no_station_selected": "Wähle mindestens eine Station.",
+          "too_many_stations": "Wähle höchstens 6 Stationen.",
+          "over_budget": "Zu viele API-Abfragen pro Stunde. Wähle weniger Stationen oder ein längeres Aktualisierungsintervall.",
+          "unknown_station": "Eine der gewählten Stationen ist unbekannt. Lade die Seite neu und versuche es erneut."
+        },
+        "abort": {
+          "cannot_connect": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. Versuche es später erneut.",
+          "entry_not_found": "Den Standort gibt es nicht mehr."
+        }
+      }
     }
   }
 }

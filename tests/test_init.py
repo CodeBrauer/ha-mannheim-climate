@@ -147,7 +147,7 @@ async def test_setup_reports_sensor_missing_from_station_list(
     issue_registry: ir.IssueRegistry,
     options: dict[str, Any],
 ) -> None:
-    """A selected sensor the station list no longer has raises a repair issue."""
+    """A selected sensor the station list no longer has raises a fixable issue."""
     api.async_get_measurements.side_effect = respond(VALUES)
     entry = add_home_entry(hass, **options)
     assert await hass.config_entries.async_setup(entry.entry_id)
@@ -156,6 +156,7 @@ async def test_setup_reports_sensor_missing_from_station_list(
         DOMAIN, issue_id(entry.entry_id, "station_removed", "removed")
     )
     assert issue is not None, "removed sensor dropped without a repair issue"
+    assert issue.is_fixable
 
 
 async def test_setup_retried_without_recent_data(

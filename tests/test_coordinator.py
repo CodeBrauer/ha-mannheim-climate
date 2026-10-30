@@ -19,6 +19,8 @@ from custom_components.mannheim_climate.const import (
     CONF_TEMPERATURE_SENSORS,
     CONF_WIND_SENSOR,
     DOMAIN,
+    ISSUE_ENTRY_ID,
+    ISSUE_SENSOR_ID,
     Field,
 )
 from custom_components.mannheim_climate.coordinator import issue_id
@@ -205,7 +207,13 @@ async def test_removed_station_creates_repair_issue(
     )
     await refresh_after(hass, coordinator, freezer, CACHE_EXPIRED)
     assert coordinator.data.temperature == 12.0
-    assert issue_registry.async_get_issue(DOMAIN, issue) is not None
+    created = issue_registry.async_get_issue(DOMAIN, issue)
+    assert created is not None
+    assert created.is_fixable
+    assert created.data == {
+        ISSUE_ENTRY_ID: coordinator.config_entry.entry_id,
+        ISSUE_SENSOR_ID: SECOND_SENSOR,
+    }
 
     api.async_get_measurements.side_effect = respond(VALUES)
     await refresh_after(hass, coordinator, freezer, CACHE_EXPIRED)

@@ -23,6 +23,8 @@ from .const import (
     DEFAULT_DEW_POINT_OFFSET_K,
     DEFAULT_SCAN_INTERVAL_MIN,
     DOMAIN,
+    ISSUE_ENTRY_ID,
+    ISSUE_SENSOR_ID,
     KEEP_VALUES_INTERVALS,
     KEEP_VALUES_MIN_AGE,
     LOGGER,
@@ -224,7 +226,11 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
             self.hass,
             DOMAIN,
             issue,
-            is_fixable=False,
+            is_fixable=True,
+            data={
+                ISSUE_ENTRY_ID: self.config_entry.entry_id,
+                ISSUE_SENSOR_ID: sensor_id,
+            },
             severity=ir.IssueSeverity.WARNING,
             translation_key=kind,
             translation_placeholders={
