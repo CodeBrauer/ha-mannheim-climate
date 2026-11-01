@@ -162,6 +162,17 @@ def _station_options(selected: list[str], wind: str) -> dict[str, Any]:
     }
 
 
+def selected_options(
+    selection: StationSelection, selected: list[str], wind: str
+) -> dict[str, Any]:
+    """Return the options for a station choice with the shortest fitting interval."""
+    interval = selection.fitting_interval(len(selected), wind)
+    return {
+        **_station_options(selected, wind),
+        CONF_SCAN_INTERVAL: interval or SCAN_INTERVAL_CHOICES_MIN[-1],
+    }
+
+
 class MannheimClimateConfigFlow(ConfigFlow, domain=DOMAIN):
     """Set up or move a location."""
 
@@ -366,11 +377,7 @@ class MannheimClimateConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     def _async_finish(self, selected: list[str], wind: str) -> ConfigFlowResult:
-        interval = self._selection.fitting_interval(len(selected), wind)
-        options = {
-            **_station_options(selected, wind),
-            CONF_SCAN_INTERVAL: interval or SCAN_INTERVAL_CHOICES_MIN[-1],
-        }
+        options = selected_options(self._selection, selected, wind)
         if self.source == SOURCE_RECONFIGURE:
             entry = self._get_reconfigure_entry()
             return self.async_update_reload_and_abort(

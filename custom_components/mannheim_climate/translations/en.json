@@ -200,11 +200,77 @@
   "issues": {
     "station_offline": {
       "title": "Station {station} sends no data",
-      "description": "The station {station} used by \"{entry}\" has not delivered data for 24 hours. The other selected stations are still used. If this continues, pick another station in the integration options."
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Station {station} sends no data",
+            "description": "The station {station} used by \"{entry}\" has not delivered data for 24 hours. The other selected stations are still used.\n\nWithout this station: {recommendation}\n\n{recommended_list}\n\nWith the recommendation the location is updated every {interval} min ({planned} of at most {budget} API requests per hour).",
+            "menu_options": {
+              "accept": "Use the recommendation",
+              "list": "Choose from a list"
+            }
+          },
+          "list": {
+            "title": "Stations",
+            "description": "{recommendation}\n\nThe current stations are pre-selected, without the one that sends no data. Planned API requests: {planned} per hour at an update interval of {interval} min (at most {budget}; the API limit of {api_limit} per hour applies per internet connection).",
+            "data": {
+              "temperature_sensors": "Stations for temperature and humidity (at most {max_stations})",
+              "wind_sensor": "Station for wind"
+            },
+            "data_description": {
+              "temperature_sensors": "One station is used as is, several are combined (median, outliers removed). The maximum follows from the API budget.",
+              "wind_sensor": "Wind is not averaged; pick one station."
+            }
+          }
+        },
+        "error": {
+          "no_station_selected": "Select at least one station.",
+          "too_many_stations": "Select at most 6 stations.",
+          "over_budget": "Too many API requests per hour. Select fewer stations or a longer update interval.",
+          "unknown_station": "One of the selected stations is unknown. Reload the page and try again."
+        },
+        "abort": {
+          "cannot_connect": "The station list could not be loaded from api.smartmannheim.de. Try again later.",
+          "entry_not_found": "The location no longer exists."
+        }
+      }
     },
     "station_removed": {
       "title": "Station {station} no longer exists",
-      "description": "The API no longer knows the station {station} used by \"{entry}\". Pick another station in the integration options."
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Station {station} no longer exists",
+            "description": "The API no longer knows the station {station} used by \"{entry}\".\n\nWithout this station: {recommendation}\n\n{recommended_list}\n\nWith the recommendation the location is updated every {interval} min ({planned} of at most {budget} API requests per hour).",
+            "menu_options": {
+              "accept": "Use the recommendation",
+              "list": "Choose from a list"
+            }
+          },
+          "list": {
+            "title": "Stations",
+            "description": "{recommendation}\n\nThe current stations are pre-selected, without the removed one. Planned API requests: {planned} per hour at an update interval of {interval} min (at most {budget}; the API limit of {api_limit} per hour applies per internet connection).",
+            "data": {
+              "temperature_sensors": "Stations for temperature and humidity (at most {max_stations})",
+              "wind_sensor": "Station for wind"
+            },
+            "data_description": {
+              "temperature_sensors": "One station is used as is, several are combined (median, outliers removed). The maximum follows from the API budget.",
+              "wind_sensor": "Wind is not averaged; pick one station."
+            }
+          }
+        },
+        "error": {
+          "no_station_selected": "Select at least one station.",
+          "too_many_stations": "Select at most 6 stations.",
+          "over_budget": "Too many API requests per hour. Select fewer stations or a longer update interval.",
+          "unknown_station": "One of the selected stations is unknown. Reload the page and try again."
+        },
+        "abort": {
+          "cannot_connect": "The station list could not be loaded from api.smartmannheim.de. Try again later.",
+          "entry_not_found": "The location no longer exists."
+        }
+      }
     }
   }
 }

@@ -82,6 +82,10 @@ OUTLIER_MIN_STATIONS = 4
 OUTLIER_MAX_DEVIATION_K = 2.5
 STATION_OFFLINE_AFTER = timedelta(hours=24)
 
+# Data of the fixable repair issues
+ISSUE_ENTRY_ID = "entry_id"
+ISSUE_SENSOR_ID = "sensor_id"
+
 
 class Environment(StrEnum):
     """Surroundings of a location, grouped from Local Climate Zones."""
