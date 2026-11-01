@@ -110,12 +110,20 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         return station.distance_to(self._latitude, self._longitude)
 
     async def _async_setup(self) -> None:
-        """Report selected sensors that are no longer in the station list."""
+        """Sync the repair issues with the selection and the station list."""
         options = self.config_entry.options
         selected = [
             *options.get(CONF_TEMPERATURE_SENSORS, []),
             options.get(CONF_WIND_SENSOR),
         ]
+        for issue in list(ir.async_get(self.hass).issues.values()):
+            data = issue.data or {}
+            if (
+                issue.domain == DOMAIN
+                and data.get(ISSUE_ENTRY_ID) == self.config_entry.entry_id
+                and data.get(ISSUE_SENSOR_ID) not in (*selected, None)
+            ):
+                ir.async_delete_issue(self.hass, DOMAIN, issue.issue_id)
         for sensor_id in selected:
             if sensor_id and self.hub.station_for_sensor(sensor_id) is None:
                 # The old station name is gone with the list, only the id is left.

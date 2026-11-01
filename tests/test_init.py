@@ -14,6 +14,8 @@ from custom_components.mannheim_climate.const import (
     CONF_TEMPERATURE_SENSORS,
     CONF_WIND_SENSOR,
     DOMAIN,
+    ISSUE_ENTRY_ID,
+    ISSUE_SENSOR_ID,
     Field,
 )
 from custom_components.mannheim_climate.coordinator import issue_id
@@ -157,6 +159,31 @@ async def test_setup_reports_sensor_missing_from_station_list(
     )
     assert issue is not None, "removed sensor dropped without a repair issue"
     assert issue.is_fixable
+
+
+async def test_setup_deletes_issues_of_deselected_sensors(
+    hass: HomeAssistant, api: MagicMock, issue_registry: ir.IssueRegistry
+) -> None:
+    """After a new selection, issues of sensors no longer selected go away."""
+    api.async_get_measurements.side_effect = respond(VALUES)
+    entry = add_home_entry(hass, **{CONF_TEMPERATURE_SENSORS: [NEAREST_SENSOR]})
+    own = issue_id(entry.entry_id, "station_offline", SECOND_SENSOR)
+    other = issue_id("other_entry", "station_offline", SECOND_SENSOR)
+    for entry_id, issue in ((entry.entry_id, own), ("other_entry", other)):
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            issue,
+            is_fixable=True,
+            data={ISSUE_ENTRY_ID: entry_id, ISSUE_SENSOR_ID: SECOND_SENSOR},
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="station_offline",
+        )
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    assert issue_registry.async_get_issue(DOMAIN, own) is None, (
+        "issue of a deselected sensor must not stay"
+    )
+    assert issue_registry.async_get_issue(DOMAIN, other) is not None
 
 
 async def test_setup_retried_without_recent_data(
