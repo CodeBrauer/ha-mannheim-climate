@@ -14,6 +14,7 @@ from homeassistant.util import dt as dt_util
 
 from .aggregation import Estimate, StationReading, estimate, latest_valid
 from .api import ApiError, SensorNotFoundError
+from .config_flow import Location
 from .const import (
     CATCH_UP_MARGIN_S,
     CONF_DEW_POINT_OFFSET,
@@ -32,7 +33,8 @@ from .const import (
     STATION_OFFLINE_AFTER,
     Field,
 )
-from .hub import RequestDeferredError
+from .hub import RequestDeferredError, StationListUnavailableError
+from .selection import StationSelection
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -110,18 +112,80 @@ class ClimateCoordinator(DataUpdateCoordinator[Estimate]):
         return station.distance_to(self._latitude, self._longitude)
 
     async def _async_setup(self) -> None:
-        """Report selected sensors that are no longer in the station list."""
+        """Sync the repair issues with the selection and the station list."""
         options = self.config_entry.options
         selected = [
             *options.get(CONF_TEMPERATURE_SENSORS, []),
             options.get(CONF_WIND_SENSOR),
         ]
+        for issue in list(ir.async_get(self.hass).issues.values()):
+            data = issue.data or {}
+            if (
+                issue.domain == DOMAIN
+                and data.get(ISSUE_ENTRY_ID) == self.config_entry.entry_id
+                and data.get(ISSUE_SENSOR_ID) not in (*selected, None)
+            ):
+                ir.async_delete_issue(self.hass, DOMAIN, issue.issue_id)
         for sensor_id in selected:
             if sensor_id and self.hub.station_for_sensor(sensor_id) is None:
                 # The old station name is gone with the list, only the id is left.
                 self._set_issue("station_removed", sensor_id, sensor_id, active=True)
 
+    async def _async_suggest_new_stations(self) -> None:
+        """Suggest the recommendation if it contains recently added stations."""
+        try:
+            stations = await self.hub.async_get_stations()
+        except StationListUnavailableError:
+            return
+        entry = self.config_entry
+        selection = StationSelection(
+            self.hass,
+            self.hub,
+            stations,
+            Location.from_data(entry.data).as_tuple(),
+            entry.entry_id,
+            entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN),
+        )
+        selected = {
+            *entry.options.get(CONF_TEMPERATURE_SENSORS, []),
+            entry.options.get(CONF_WIND_SENSOR),
+        }
+        recommended = [
+            *selection.recommended_sensor_ids(),
+            selection.recommended_wind_sensor_id(),
+        ]
+        new = sorted(
+            sensor_id
+            for sensor_id in recommended
+            if sensor_id not in selected and self.hub.is_new(sensor_id)
+        )
+        if not selection.recommendation_fits():
+            new = []
+        # The id names the proposal, so ignoring the issue ignores this proposal only.
+        current = issue_id(entry.entry_id, "new_stations", "-".join(new))
+        prefix = issue_id(entry.entry_id, "new_stations", "")
+        for domain, issue in list(ir.async_get(self.hass).issues):
+            if domain == DOMAIN and issue.startswith(prefix) and issue != current:
+                ir.async_delete_issue(self.hass, DOMAIN, issue)
+        if not new:
+            return
+        labels = dict.fromkeys(self.hub.station_for_sensor(s).label for s in new)
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            current,
+            is_fixable=True,
+            data={ISSUE_ENTRY_ID: entry.entry_id},
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="new_stations",
+            translation_placeholders={
+                "stations": ", ".join(labels),
+                "entry": entry.title,
+            },
+        )
+
     async def _async_update_data(self) -> Estimate:
+        await self._async_suggest_new_stations()
         now = dt_util.utcnow()
         self._deferred_wait = 0.0
         readings: list[StationReading] = []

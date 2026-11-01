@@ -20,6 +20,7 @@ from .const import (
     LOGGER,
     MEASUREMENT_CACHE_TTL,
     MEASUREMENT_LIMITS,
+    NEW_STATION_PERIOD,
     SENSOR_LIST_LIMITS,
     SENSOR_LIST_MAX_AGE,
     STORAGE_KEY,
@@ -29,6 +30,7 @@ from .reference import ReferenceData, load_reference_data
 from .stations import Station, build_stations
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from datetime import datetime
 
     from homeassistant.core import HomeAssistant
@@ -99,6 +101,25 @@ def requests_per_hour(sensor_count: int, interval_minutes: int) -> int:
     return round(sensor_count * MINUTES_PER_HOUR / interval_minutes)
 
 
+def track_first_seen(
+    first_seen: dict[str, str | None] | None,
+    sensor_ids: Iterable[str],
+    now: datetime,
+) -> dict[str, str | None]:
+    """
+    Remember when each sensor of the station list first appeared (ISO time).
+
+    Without a history (first refresh after install or update) all sensors count as
+    known (None), so only sensors added later are new.
+    """
+    if first_seen is None:
+        return dict.fromkeys(sensor_ids)
+    return {
+        sensor_id: first_seen[sensor_id] if sensor_id in first_seen else now.isoformat()
+        for sensor_id in sensor_ids
+    }
+
+
 class ClimateHub:
     """One instance per Home Assistant, shared by all config entries."""
 
@@ -120,6 +141,7 @@ class ClimateHub:
         self._stations_fetched_at: datetime | None = None
         self._stations_lock = asyncio.Lock()
         self._sensor_index: dict[str, Station] = {}
+        self._first_seen: dict[str, str | None] = {}
         self._rate_limit_logged = False
 
     async def async_get_stations(self) -> list[Station]:
@@ -137,17 +159,26 @@ class ClimateHub:
                 dt_util.parse_datetime(stored["fetched_at"]) if stored else None
             )
             payload = stored["payload"] if stored else None
+            first_seen = stored.get("first_seen") if stored else None
+            fresh = None
             if fetched_at is None or now - fetched_at >= SENSOR_LIST_MAX_AGE:
                 fresh = await self._async_fetch_sensor_list()
                 if fresh is not None:
                     payload, fetched_at = fresh, now
-                    await self._store.async_save(
-                        {"fetched_at": now.isoformat(), "payload": payload}
-                    )
             if payload is None:
                 msg = "Station list not available"
                 raise StationListUnavailableError(msg)
             self._set_stations(payload, fetched_at)
+            if fresh is not None:
+                first_seen = track_first_seen(first_seen, self._sensor_index, now)
+                await self._store.async_save(
+                    {
+                        "fetched_at": now.isoformat(),
+                        "payload": payload,
+                        "first_seen": first_seen,
+                    }
+                )
+            self._first_seen = first_seen or {}
             return self._stations
 
     async def _async_fetch_sensor_list(self) -> dict[str, Any] | None:
@@ -176,6 +207,12 @@ class ClimateHub:
     def station_for_sensor(self, sensor_id: str) -> Station | None:
         """Return the station a sensor belongs to (after async_get_stations)."""
         return self._sensor_index.get(sensor_id)
+
+    def is_new(self, sensor_id: str) -> bool:
+        """Return True if the sensor was added to the station list recently."""
+        first_seen = self._first_seen.get(sensor_id)
+        seen = dt_util.parse_datetime(first_seen) if first_seen else None
+        return seen is not None and dt_util.utcnow() - seen < NEW_STATION_PERIOD
 
     def cached_measurements(self, sensor_id: str) -> list[Measurement]:
         """Return the last fetched measurements of a sensor (possibly stale)."""
@@ -226,6 +263,7 @@ class ClimateHub:
         return {
             "stations": len(self._stations or []),
             "stations_fetched_at": self._stations_fetched_at,
+            "new_sensors": sorted(s for s in self._first_seen if self.is_new(s)),
             "cached_sensors": len(self._measurements),
             "rate_limited": self._measurement_limiter.blocked,
             "seconds_until_next_request": round(self._measurement_limiter.wait_time()),

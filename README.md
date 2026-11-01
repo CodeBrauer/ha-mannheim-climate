@@ -42,7 +42,8 @@ mehrere Stationen um dich herum.
 - **Hält die API-Limits ein** (gemeinsames Abfrage-Budget und Cache für alle Standorte).
 - **Mehrere Standorte** (Zuhause, Arbeit, …), jeder als eigenes Gerät.
 - **Reparaturhinweise**, wenn eine gewählte Station keine Daten mehr liefert oder
-  verschwindet, mit Ersatzvorschlag zum direkten Übernehmen.
+  verschwindet, mit Ersatzvorschlag zum direkten Übernehmen, und **Vorschläge**, wenn neue
+  Stationen in der Nähe hinzukommen.
 - **Neu konfigurieren**, um einen Standort zu verschieben, **Optionen** für Stationen,
   Aktualisierungsintervall und eine Taupunkt-Korrektur.
 - **Diagnose-Download** (Koordinaten geschwärzt).
@@ -114,6 +115,12 @@ Die Umgebung wird aus lokalen Klimazonen (LCZ) gruppiert: dicht bebaut (LCZ 1–
 bebaut (4–6, 9), Industrie/Gewerbe (7, 8, 10) und grün/offen (11–17). Die Zone einer
 Station stammt, wo vorhanden, aus dem Metadatenkatalog der Stadt, sonst aus der globalen
 LCZ-Karte.
+
+Kommen neue Stationen hinzu, die zur Empfehlung für einen eingerichteten Standort gehören,
+erscheint 30 Tage lang ein Reparaturhinweis mit dem Vorschlag. Die Auswahl ändert sich nur,
+wenn du ihn übernimmst: Andere Stationen verändern die Werte (Sprünge in
+Langzeitstatistiken) und das API-Budget. Behältst du deine Stationen, kommt der Hinweis
+erst bei einem anderen Vorschlag wieder.
 
 ## API-Limits
 

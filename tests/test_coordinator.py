@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
@@ -21,6 +21,7 @@ from custom_components.mannheim_climate.const import (
     DOMAIN,
     ISSUE_ENTRY_ID,
     ISSUE_SENSOR_ID,
+    NEW_STATION_PERIOD,
     Field,
 )
 from custom_components.mannheim_climate.coordinator import issue_id
@@ -32,7 +33,9 @@ from .common import (
     NEAREST_WIND_SENSOR,
     SECOND_SENSOR,
     add_home_entry,
+    add_location,
     respond,
+    store_sensor_list,
 )
 
 if TYPE_CHECKING:
@@ -258,3 +261,69 @@ async def test_unload_cancels_catch_up(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert api.async_get_measurements.await_count == 4
+
+
+# Suggestions of new stations
+
+
+async def test_new_station_in_recommendation_is_suggested_for_thirty_days(
+    hass: HomeAssistant,
+    api: MagicMock,
+    freezer: FrozenDateTimeFactory,
+    hass_storage: dict[str, Any],
+    issue_registry: ir.IssueRegistry,
+) -> None:
+    """The recommended station was added to the list; the location uses another."""
+    store_sensor_list(hass_storage, timedelta(days=3), new=NEAREST_SENSOR)
+    coordinator = await set_up(hass, api, [SECOND_SENSOR])
+    entry_id = coordinator.config_entry.entry_id
+    issue = issue_id(entry_id, "new_stations", NEAREST_SENSOR)
+    suggestion = issue_registry.async_get_issue(DOMAIN, issue)
+    assert suggestion is not None
+    assert suggestion.is_fixable
+    assert suggestion.data == {ISSUE_ENTRY_ID: entry_id}
+    assert suggestion.translation_placeholders["stations"] == "Seckenheim (2507LH096)"
+
+    await refresh_after(hass, coordinator, freezer, NEW_STATION_PERIOD)
+    assert api.async_get_sensors_payload.await_count == 2, (
+        "the station list must be refreshed while running"
+    )
+    assert issue_registry.async_get_issue(DOMAIN, issue) is None
+
+
+@pytest.mark.parametrize(
+    ("new", "sensors"),
+    [(None, [SECOND_SENSOR]), (NEAREST_SENSOR, [NEAREST_SENSOR, SECOND_SENSOR])],
+    ids=["first_refresh_after_update", "already_selected"],
+)
+async def test_no_suggestion_without_new_unselected_station(  # noqa: PLR0913
+    hass: HomeAssistant,
+    api: MagicMock,
+    hass_storage: dict[str, Any],
+    issue_registry: ir.IssueRegistry,
+    new: str | None,
+    sensors: list[str],
+) -> None:
+    """Known stations and stations already in use are not suggested."""
+    store_sensor_list(hass_storage, timedelta(days=3), new=new)
+    await set_up(hass, api, sensors)
+    assert not [
+        issue for _, issue in issue_registry.issues if issue.startswith("new_stations")
+    ]
+
+
+async def test_suggestion_withdrawn_when_recommendation_no_longer_fits(
+    hass: HomeAssistant,
+    api: MagicMock,
+    hass_storage: dict[str, Any],
+    issue_registry: ir.IssueRegistry,
+) -> None:
+    """Another location using 21 of 24 requests leaves no room for the suggestion."""
+    store_sensor_list(hass_storage, timedelta(days=3), new=NEAREST_SENSOR)
+    coordinator = await set_up(hass, api, [SECOND_SENSOR])
+    issue = issue_id(coordinator.config_entry.entry_id, "new_stations", NEAREST_SENSOR)
+    assert issue_registry.async_get_issue(DOMAIN, issue) is not None
+
+    add_location(hass, 6, 20)
+    await coordinator.async_refresh()
+    assert issue_registry.async_get_issue(DOMAIN, issue) is None

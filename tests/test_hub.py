@@ -18,8 +18,8 @@ from custom_components.mannheim_climate.api import (
 )
 from custom_components.mannheim_climate.const import (
     MEASUREMENT_LIMITS,
+    NEW_STATION_PERIOD,
     STORAGE_KEY,
-    STORAGE_VERSION,
 )
 from custom_components.mannheim_climate.hub import (
     ClimateHub,
@@ -27,9 +27,17 @@ from custom_components.mannheim_climate.hub import (
     RequestDeferredError,
     StationListUnavailableError,
     async_get_hub,
+    track_first_seen,
 )
 
-from .common import MEASUREMENTS, NEAREST_WIND_SENSOR, sensors_payload
+from .common import (
+    MEASURED_AT,
+    MEASUREMENTS,
+    NEAREST_SENSOR,
+    NEAREST_WIND_SENSOR,
+    sensors_payload,
+    store_sensor_list,
+)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -39,6 +47,7 @@ if TYPE_CHECKING:
 
 RATE_LIMIT_WARNING = "rate limit was hit"
 STATIONS_IN_FIXTURE = 27
+NOW = MEASURED_AT
 
 
 # RateLimiter (4 requests per 2 minutes, 30 per hour)
@@ -193,19 +202,6 @@ async def test_concurrent_requests_for_one_sensor_share_the_response(
 # Station list (refreshed once a day, stored copy as fallback)
 
 
-def store_sensor_list(hass_storage: dict[str, Any], age: timedelta) -> None:
-    """Put a sensor list fetched `age` ago into the mocked storage."""
-    hass_storage[STORAGE_KEY] = {
-        "version": STORAGE_VERSION,
-        "minor_version": 1,
-        "key": STORAGE_KEY,
-        "data": {
-            "fetched_at": (dt_util.utcnow() - age).isoformat(),
-            "payload": sensors_payload(),
-        },
-    }
-
-
 async def test_station_list_fetched_once_a_day(
     hass: HomeAssistant,
     hass_storage: dict[str, Any],
@@ -283,3 +279,58 @@ async def test_station_list_rate_limit_blocks_further_requests(
     assert hass_storage[STORAGE_KEY]["data"]["fetched_at"] == (
         dt_util.utcnow().isoformat()
     )
+
+
+# New sensors (first seen in the station list)
+
+
+@pytest.mark.parametrize(
+    ("history", "expected"),
+    [
+        (None, {"a": None, "b": None, "c": None}),
+        (
+            {"a": None, "b": "2026-10-01T00:00:00+00:00", "gone": None},
+            {"a": None, "b": "2026-10-01T00:00:00+00:00", "c": NOW.isoformat()},
+        ),
+    ],
+    ids=["no_history", "history"],
+)
+def test_track_first_seen(
+    history: dict[str, str | None] | None, expected: dict[str, str | None]
+) -> None:
+    """Without history all sensors are known; later only added ones get a time."""
+    assert track_first_seen(history, ["a", "b", "c"], NOW) == expected
+
+
+async def test_added_sensor_is_new_for_thirty_days(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    api: MagicMock,  # noqa: ARG001
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """A sensor missing from the stored history is new from the next refresh on."""
+    store_sensor_list(hass_storage, timedelta(days=3), new=NEAREST_WIND_SENSOR)
+    hub = await async_get_hub(hass)
+    await hub.async_get_stations()
+    assert hub.is_new(NEAREST_WIND_SENSOR)
+    assert not hub.is_new(NEAREST_SENSOR)
+    first_seen = hass_storage[STORAGE_KEY]["data"]["first_seen"]
+    assert first_seen[NEAREST_WIND_SENSOR] == dt_util.utcnow().isoformat()
+
+    freezer.tick(NEW_STATION_PERIOD - timedelta(seconds=1))
+    assert hub.is_new(NEAREST_WIND_SENSOR)
+    freezer.tick(timedelta(seconds=1))
+    assert not hub.is_new(NEAREST_WIND_SENSOR)
+
+
+async def test_first_refresh_after_update_knows_all_sensors(
+    hass: HomeAssistant,
+    hass_storage: dict[str, Any],
+    api: MagicMock,  # noqa: ARG001
+) -> None:
+    """A stored list without history must not make every sensor new."""
+    store_sensor_list(hass_storage, timedelta(days=3))
+    hub = await async_get_hub(hass)
+    await hub.async_get_stations()
+    assert not hub.is_new(NEAREST_WIND_SENSOR)
+    assert set(hass_storage[STORAGE_KEY]["data"]["first_seen"].values()) == {None}

@@ -1,4 +1,4 @@
-"""Fix flows that replace a station that went offline or disappeared."""
+"""Fix flows: replace a broken station, or apply a suggestion with new stations."""
 
 from __future__ import annotations
 
@@ -36,11 +36,14 @@ async def async_create_fix_flow(
     issue_id: str,  # noqa: ARG001
     data: dict[str, str | int | float | None] | None,
 ) -> RepairsFlow:
-    """Create the flow for a station_offline or station_removed issue."""
-    return StationRepairFlow(str(data[ISSUE_ENTRY_ID]), str(data[ISSUE_SENSOR_ID]))
+    """Create the flow for a station_offline, station_removed or new_stations issue."""
+    sensor_id = data.get(ISSUE_SENSOR_ID)
+    return StationRepairFlow(
+        str(data[ISSUE_ENTRY_ID]), str(sensor_id) if sensor_id else None
+    )
 
 
-def without_sensor(stations: list[Station], sensor_id: str) -> list[Station]:
+def without_sensor(stations: list[Station], sensor_id: str | None) -> list[Station]:
     """Return the stations as if the sensor did not exist."""
 
     def keep(sensor: ApiSensor | None) -> ApiSensor | None:
@@ -57,10 +60,10 @@ def without_sensor(stations: list[Station], sensor_id: str) -> list[Station]:
 
 
 class StationRepairFlow(RepairsFlow):
-    """Replace one sensor of a location: recommendation without it, or a list."""
+    """Replace a broken sensor of a location, or apply a suggested recommendation."""
 
-    def __init__(self, entry_id: str, sensor_id: str) -> None:
-        """Remember the location and the sensor to replace."""
+    def __init__(self, entry_id: str, sensor_id: str | None) -> None:
+        """Remember the location and the sensor to replace (None: suggestion)."""
         self._entry_id = entry_id
         self._sensor_id = sensor_id
         self._entry: ConfigEntry | None = None
@@ -87,7 +90,9 @@ class StationRepairFlow(RepairsFlow):
             self._entry_id,
             self._entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN),
         )
-        options = ["list"]
+        # A suggestion is applied or kept as a whole. Keeping some stations from a
+        # list would bring the same suggestion back with the next update.
+        options = ["list"] if self._sensor_id else ["keep"]
         if selection.recommendation_fits():
             options.insert(0, "accept")
         return self.async_show_menu(
@@ -111,6 +116,18 @@ class StationRepairFlow(RepairsFlow):
         return self._async_save(
             selection.recommended_sensor_ids(), selection.recommended_wind_sensor_id()
         )
+
+    async def async_step_keep(
+        self,
+        user_input: dict[str, Any] | None = None,  # noqa: ARG002
+    ) -> RepairsFlowResult:
+        """Keep the current stations and stop showing this suggestion."""
+        # The repair dialog offers no "ignore" for fixable issues. Finishing the flow
+        # would delete the issue and the next update would raise it again; an ignored
+        # issue stays ignored when it is raised again with the same id.
+        if ir.async_get(self.hass).async_get_issue(DOMAIN, self.issue_id):
+            ir.async_ignore_issue(self.hass, DOMAIN, self.issue_id, ignore=True)
+        return self.async_abort(reason="kept")
 
     async def async_step_list(
         self, user_input: dict[str, Any] | None = None
