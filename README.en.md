@@ -38,7 +38,8 @@ stations around you instead.
 - **Respects the API limits** (shared request budget and cache across all locations).
 - **Several locations** (home, work, ...), each as its own device.
 - **Repairs** when a selected station stops delivering data or disappears, with a
-  replacement you can apply directly.
+  replacement you can apply directly, and **suggestions** when new stations are added
+  nearby.
 - **Reconfigure** to move a location, **options** to change stations, update interval and
   a dew point correction.
 - **Diagnostics** download (coordinates redacted).
@@ -110,6 +111,11 @@ Screenshots show the German user interface.
 Surroundings are grouped from Local Climate Zones: densely built (LCZ 1–3), open built-up
 (4–6, 9), industrial (7, 8, 10) and green/open (11–17). The zone of a station comes from the
 city's metadata catalogue where available, otherwise from the global LCZ map.
+
+When new stations are added that are part of the recommendation for a configured location,
+a repair issue suggests them for 30 days. The selection only changes if you apply it:
+other stations change the values (jumps in long-term statistics) and the API budget. If you
+keep your stations, it only comes back for a different suggestion.
 
 ## API limits
 

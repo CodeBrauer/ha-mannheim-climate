@@ -29,6 +29,8 @@ CATCH_UP_MARGIN_S = 2
 PLANNED_BUDGET_PER_HOUR = 24
 
 SENSOR_LIST_MAX_AGE = timedelta(hours=24)
+# How long a station added to the list is suggested for existing locations.
+NEW_STATION_PERIOD = timedelta(days=30)
 MEASUREMENT_CACHE_TTL = timedelta(minutes=9)
 STORAGE_VERSION = 1
 STORAGE_KEY = f"{DOMAIN}.sensors"

@@ -271,6 +271,26 @@
           "entry_not_found": "Den Standort gibt es nicht mehr."
         }
       }
+    },
+    "new_stations": {
+      "title": "Neue Stationen bei „{entry}“",
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "Neue Stationen bei „{entry}“",
+            "description": "In der Nähe von „{entry}“ gibt es neue Stationen, die zur aktuellen Empfehlung gehören: {stations}.\n\n{recommendation}\n\n{recommended_list}\n\nMit der Empfehlung wird alle {interval} min aktualisiert ({planned} von höchstens {budget} API-Abfragen pro Stunde). Andere Stationen verändern die Werte, das kann in Langzeitstatistiken als Sprung sichtbar sein.\n\nMit *Bisherige Stationen behalten* bleibt alles, wie es ist. Um selbst Stationen zu wählen, nutze *Konfigurieren* im Menü der Integration.",
+            "menu_options": {
+              "accept": "Empfehlung übernehmen",
+              "keep": "Bisherige Stationen behalten"
+            }
+          }
+        },
+        "abort": {
+          "cannot_connect": "Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. Versuche es später erneut.",
+          "entry_not_found": "Den Standort gibt es nicht mehr.",
+          "kept": "Deine Stationen bleiben, wie sie sind. Dieser Vorschlag wird nicht mehr angezeigt, du findest ihn unter den ignorierten Reparaturen."
+        }
+      }
     }
   }
 }

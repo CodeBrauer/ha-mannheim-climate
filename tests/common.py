@@ -20,6 +20,8 @@ from custom_components.mannheim_climate.const import (
     CONF_TEMPERATURE_SENSORS,
     CONF_WIND_SENSOR,
     DOMAIN,
+    STORAGE_KEY,
+    STORAGE_VERSION,
     Environment,
     Field,
     MountZone,
@@ -66,6 +68,32 @@ def sensors_payload() -> dict[str, Any]:
     2306LH126 (swapped coordinates).
     """
     return json.loads((FIXTURES / "sensors.json").read_text("utf-8"))
+
+
+def store_sensor_list(
+    hass_storage: dict[str, Any], age: timedelta, *, new: str | None = None
+) -> None:
+    """
+    Put a sensor list fetched `age` ago into the mocked storage.
+
+    Without `new` the list has no history yet, as after an update. With `new` all
+    other sensors are known, so `new` counts as added with the next refresh.
+    """
+    payload = sensors_payload()
+    data: dict[str, Any] = {
+        "fetched_at": (dt_util.utcnow() - age).isoformat(),
+        "payload": payload,
+    }
+    if new:
+        data["first_seen"] = {
+            sensor["id"]: None for sensor in payload["sensors"] if sensor["id"] != new
+        }
+    hass_storage[STORAGE_KEY] = {
+        "version": STORAGE_VERSION,
+        "minor_version": 1,
+        "key": STORAGE_KEY,
+        "data": data,
+    }
 
 
 def offset(distance_m: float, bearing_deg: float) -> tuple[float, float]:

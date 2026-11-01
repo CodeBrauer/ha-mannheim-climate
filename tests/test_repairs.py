@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any
 
@@ -31,6 +32,7 @@ from .common import (
     add_home_entry,
     add_location,
     respond,
+    store_sensor_list,
 )
 
 if TYPE_CHECKING:
@@ -56,16 +58,34 @@ async def client(
 
 
 async def set_up(
-    hass: HomeAssistant, api: MagicMock, broken: str, **options: Any
+    hass: HomeAssistant, api: MagicMock, broken: str | None, **options: Any
 ) -> MockConfigEntry:
     """Set up a location at HOME; the broken sensor is unknown to the API."""
     values = defaultdict(
-        lambda: {Field.TEMPERATURE: 12.0}, {broken: SensorNotFoundError("gone")}
+        lambda: {Field.TEMPERATURE: 12.0},
+        {broken: SensorNotFoundError("gone")} if broken else {},
     )
     api.async_get_measurements.side_effect = respond(values)
     entry = add_home_entry(hass, **options)
     assert await hass.config_entries.async_setup(entry.entry_id)
     return entry
+
+
+async def set_up_suggestion(
+    hass: HomeAssistant, api: MagicMock, hass_storage: dict[str, Any]
+) -> tuple[MockConfigEntry, str]:
+    """Set up a location that is suggested the newly added recommended station."""
+    store_sensor_list(hass_storage, timedelta(days=3), new=NEAREST_SENSOR)
+    entry = await set_up(
+        hass,
+        api,
+        None,
+        **{
+            CONF_TEMPERATURE_SENSORS: [SECOND_SENSOR],
+            CONF_WIND_SENSOR: NEAREST_WIND_SENSOR,
+        },
+    )
+    return entry, issue_id(entry.entry_id, "new_stations", NEAREST_SENSOR)
 
 
 async def start_fix(client: TestClient, issue: str) -> dict[str, Any]:
@@ -212,3 +232,47 @@ async def test_fix_aborts_for_unknown_location(
     result = await start_fix(client, "station_offline_unknown")
     assert result["type"] == "abort"
     assert result["reason"] == "entry_not_found"
+
+
+async def test_fix_suggestion_uses_recommendation(
+    hass: HomeAssistant,
+    api: MagicMock,
+    client: TestClient,
+    hass_storage: dict[str, Any],
+    issue_registry: ir.IssueRegistry,
+) -> None:
+    """Accepting a suggestion switches to the recommendation with the new station."""
+    entry, issue = await set_up_suggestion(hass, api, hass_storage)
+
+    result = await start_fix(client, issue)
+    assert result["menu_options"] == ["accept", "keep"]
+    assert result["description_placeholders"]["stations"] == "Seckenheim (2507LH096)"
+
+    result = await fix_step(client, result, {"next_step_id": "accept"})
+    assert result["type"] == "create_entry"
+    await hass.async_block_till_done()
+    assert entry.options[CONF_TEMPERATURE_SENSORS] == [NEAREST_SENSOR]
+    assert entry.options[CONF_WIND_SENSOR] == NEAREST_WIND_SENSOR
+    assert issue_registry.async_get_issue(DOMAIN, issue) is None
+
+
+async def test_fix_suggestion_keeps_stations(
+    hass: HomeAssistant,
+    api: MagicMock,
+    client: TestClient,
+    hass_storage: dict[str, Any],
+    issue_registry: ir.IssueRegistry,
+) -> None:
+    """Keeping the stations ignores this suggestion, also after the next update."""
+    entry, issue = await set_up_suggestion(hass, api, hass_storage)
+
+    result = await start_fix(client, issue)
+    result = await fix_step(client, result, {"next_step_id": "keep"})
+    assert result["type"] == "abort"
+    assert result["reason"] == "kept"
+    assert entry.options[CONF_TEMPERATURE_SENSORS] == [SECOND_SENSOR]
+
+    await entry.runtime_data.async_refresh()
+    kept = issue_registry.async_get_issue(DOMAIN, issue)
+    assert kept is not None
+    assert kept.dismissed_version is not None, "the suggestion must stay ignored"

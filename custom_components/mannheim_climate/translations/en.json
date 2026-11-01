@@ -271,6 +271,26 @@
           "entry_not_found": "The location no longer exists."
         }
       }
+    },
+    "new_stations": {
+      "title": "New stations near \"{entry}\"",
+      "fix_flow": {
+        "step": {
+          "init": {
+            "title": "New stations near \"{entry}\"",
+            "description": "New stations were added near \"{entry}\" and are part of the current recommendation: {stations}.\n\n{recommendation}\n\n{recommended_list}\n\nWith the recommendation the location is updated every {interval} min ({planned} of at most {budget} API requests per hour). Other stations change the values, which can show as a jump in long-term statistics.\n\n*Keep my current stations* leaves everything as it is. To pick stations yourself, use *Configure* in the integration's menu.",
+            "menu_options": {
+              "accept": "Use the recommendation",
+              "keep": "Keep my current stations"
+            }
+          }
+        },
+        "abort": {
+          "cannot_connect": "The station list could not be loaded from api.smartmannheim.de. Try again later.",
+          "entry_not_found": "The location no longer exists.",
+          "kept": "Your stations stay as they are. This suggestion is no longer shown; you find it under the ignored repairs."
+        }
+      }
     }
   }
 }
