@@ -1,0 +1,40 @@
+# German translation of the documentation site, see mkdocs.yml. Only language
+# specific settings live here; lists (nav, palette) replace the inherited ones.
+INHERIT: mkdocs.yml
+site_url: https://codebrauer.github.io/ha-mannheim-climate/de/
+edit_uri: edit/main/docs/de/
+copyright: Inoffizielles Projekt, nicht verbunden mit der Smart City Mannheim GmbH oder der Stadt Mannheim.
+
+docs_dir: docs/de
+site_dir: site/de
+
+nav:
+  - index.md
+  - Benutzerhandbuch:
+      - user/installation.md
+      - user/setup.md
+      - user/entities.md
+      - user/stations.md
+      - user/api-limits.md
+      - user/troubleshooting.md
+  - Entwicklung:
+      - developer/architecture.md
+      - developer/data-flow.md
+      - developer/aggregation.md
+      - developer/reference-data.md
+      - developer/contributing.md
+  - data-sources.md
+
+theme:
+  language: de
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: lucide/moon
+        name: Dunkles Design
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: lucide/sun
+        name: Helles Design
