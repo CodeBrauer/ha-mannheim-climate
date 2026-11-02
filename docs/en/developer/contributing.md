@@ -14,8 +14,12 @@ apply to humans and AI agents alike.
 | `scripts/test` | pytest; arguments are passed on, e.g. `scripts/test -k recommend` |
 | `scripts/docs` | Serves the documentation locally; `scripts/docs de` for German, `scripts/docs build` for both |
 
-On macOS some Home Assistant dependencies need extra build flags, see *Development* in the
-[README](https://github.com/CodeBrauer/ha-mannheim-climate/blob/main/README.en.md#development).
+On macOS some Home Assistant dependencies (`pymicro-vad`, `pyspeex-noise`) have no wheels
+for Python 3.14 and fail to compile. Build them once with the SDK path:
+
+```bash
+SDK=$(xcrun --show-sdk-path) SDKROOT="$SDK" CXXFLAGS="-isysroot $SDK -I$SDK/usr/include/c++/v1" uv pip install --python .venv/bin/python pymicro-vad pyspeex-noise
+```
 
 !!! warning "The API is shared"
     The API limits apply per public IP, shared with your own Home Assistant. Never poll the

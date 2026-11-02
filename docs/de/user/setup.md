@@ -1,9 +1,10 @@
-<!-- source: 34407d5ff5e2ce407c36cde1c79a7d66655b7b4d -->
+<!-- source: 749b76c598c3fb0ee56003ad92e927ae40f49ae6 -->
 # Einrichtung
 
 *Einstellungen → Geräte & Dienste → Integration hinzufügen → Klimamessnetz Mannheim*
 
-Jeder Standort, den du hinzufügst, wird ein eigenes Gerät mit eigenen Entitäten.
+Jeder Standort, den du hinzufügst, wird ein eigenes Gerät mit eigenen Entitäten. Die
+Screenshots zeigen die deutsche Oberfläche.
 
 ```mermaid
 flowchart TD
@@ -31,6 +32,8 @@ höchstens 10 km.
   Fehler.
 - Zwei Standorte, die weniger als etwa 100 m auseinander liegen, gelten als derselbe und
   lassen sich nicht doppelt anlegen.
+
+![Standort wählen](../screenshots/01-location.jpg)
 
 ## 2. Umgebung
 

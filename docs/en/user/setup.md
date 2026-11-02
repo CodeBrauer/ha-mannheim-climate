@@ -2,7 +2,8 @@
 
 *Settings → Devices & services → Add integration → Klimamessnetz Mannheim*
 
-Each location you add becomes its own device with its own entities.
+Each location you add becomes its own device with its own entities. The screenshots show the
+German user interface.
 
 ```mermaid
 flowchart TD
@@ -28,6 +29,8 @@ location. The circle is the search radius for the recommendation: 3 km by defaul
 
 - There must be a temperature station within 10 km, otherwise the step shows an error.
 - Two locations closer than about 100 m count as the same and cannot be added twice.
+
+![Choose the location](../screenshots/01-location.jpg)
 
 ## 2. Surroundings
 

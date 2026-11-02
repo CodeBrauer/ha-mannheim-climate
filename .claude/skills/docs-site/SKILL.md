@@ -30,7 +30,7 @@ Every sentence exists twice, so keep the token cost low: translate only what cha
 
 - German like the UI and `README.md`: informal "du", short sentences.
 - UI labels as in `custom_components/mannheim_climate/translations/de.json` (grep the English text in `strings.json` to find the key).
-- Keep: code, identifiers, constant names, file paths, URLs, image paths, Mermaid syntax and node ids. Example entity ids use the German name, like `README.md` (`sensor.seckenheim_temperatur`).
+- Keep: code, identifiers, constant names, file paths, URLs, image paths, Mermaid syntax and node ids. Example entity ids use the German name (`sensor.seckenheim_temperatur`).
 - Translate: prose, table cells, alt texts, admonition titles, Mermaid labels (state names via the `state "Label" as Id` lines), strings in YAML examples.
 - Links to headings use the German anchor (`#neue-stationen-in-der-nahe`).
 

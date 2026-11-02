@@ -94,4 +94,4 @@ Do not edit these by hand:
 
 - `scripts/develop` runs Home Assistant with `config/` as configuration directory. The login of the local instance is in `config/dev-credentials.txt`; never commit or print it.
 - `homeassistant.restart` crashes the dev instance on macOS with Python 3.14. Stop and start the process instead.
-- Build problems on macOS: see "Entwicklung" in `README.md`.
+- Build problems on macOS: see "Development environment" in `docs/en/developer/contributing.md`.

@@ -1,4 +1,4 @@
-<!-- source: 5c99bf1badda3134b2f9bc1615bd81b47f3c70b5 -->
+<!-- source: a5d370806356e0ff6cf3a6358303d68ba7846140 -->
 # Mitarbeit
 
 Die Regeln für Code, Tests, Commits, Pull Requests und Versionierung stehen in
@@ -15,9 +15,13 @@ gelten für Menschen und KI-Agenten gleichermaßen.
 | `scripts/test` | pytest; Argumente werden weitergegeben, z. B. `scripts/test -k recommend` |
 | `scripts/docs` | Startet die Doku lokal; `scripts/docs de` für Deutsch, `scripts/docs build` für beide |
 
-Unter macOS brauchen einige Abhängigkeiten von Home Assistant zusätzliche Build-Flags, siehe
-*Entwicklung* in der
-[README](https://github.com/CodeBrauer/ha-mannheim-climate/blob/main/README.md#entwicklung).
+Unter macOS gibt es für einige Abhängigkeiten von Home Assistant (`pymicro-vad`,
+`pyspeex-noise`) keine Wheels für Python 3.14, und der Build scheitert. Einmal mit SDK-Pfad
+bauen:
+
+```bash
+SDK=$(xcrun --show-sdk-path) SDKROOT="$SDK" CXXFLAGS="-isysroot $SDK -I$SDK/usr/include/c++/v1" uv pip install --python .venv/bin/python pymicro-vad pyspeex-noise
+```
 
 !!! warning "Die API ist geteilt"
     Die API-Limits gelten pro öffentlicher IP, geteilt mit deinem eigenen Home Assistant.
