@@ -18,6 +18,7 @@ Home Assistant custom integration `mannheim_climate` ("Klimamessnetz Mannheim").
 | `coordinator.py` | Polling per location, catch-up of deferred requests, repair issues |
 | `sensor.py`, `weather.py`, `diagnostics.py` | Entities and diagnostics |
 | `tests/` | pytest with `pytest-homeassistant-custom-component` |
+| `docs/`, `mkdocs*.yml` | Documentation site (Zensical, GitHub Pages): `docs/en/` source, `docs/de/` German translation |
 | `config/` | Local dev instance (gitignored) |
 
 ## Commands
@@ -25,17 +26,20 @@ Home Assistant custom integration `mannheim_climate` ("Klimamessnetz Mannheim").
 ```bash
 scripts/setup      # .venv with Home Assistant (uv, Python 3.14)
 scripts/develop    # dev instance on http://localhost:8123
-scripts/lint       # ruff format + check (select = ALL)
+scripts/lint       # ruff format + check (select = ALL), docs translation check
 scripts/test       # pytest, arguments are passed through
+scripts/docs       # docs on http://localhost:8000 (`de`: German, `build`: check + strict build)
+uv run --no-project --with playwright python scripts/screenshots.py  # docs screenshots, needs scripts/develop
 ```
 
-Run `scripts/lint` and `scripts/test` before every push. CI runs lint, pytest, hassfest and HACS validation; all must pass.
+Run `scripts/lint` and `scripts/test` before every push. CI runs lint, pytest, hassfest, HACS validation and, for docs changes, the strict docs build; all must pass.
 
 ## Language
 
 - Code, comments, commits, issues, PRs and release notes are written in English.
 - `README.md` is German (shown by HACS), `README.en.md` is its English version. Change both together.
 - UI strings: `strings.json` is the source, `translations/en.json` an identical copy, `translations/de.json` the German translation. Change all three together with identical keys.
+- Docs site: `docs/en/` is the source, `docs/de/` its German translation with the same files and outline. A PR that changes documented behaviour updates both, and the READMEs where they describe it; `scripts/check_docs.py` enforces the sync of the docs. Workflow (translate only the diff): [`.claude/skills/docs-site/SKILL.md`](.claude/skills/docs-site/SKILL.md).
 
 ## Versioning
 
@@ -91,4 +95,4 @@ Do not edit these by hand:
 
 - `scripts/develop` runs Home Assistant with `config/` as configuration directory. The login of the local instance is in `config/dev-credentials.txt`; never commit or print it.
 - `homeassistant.restart` crashes the dev instance on macOS with Python 3.14. Stop and start the process instead.
-- Build problems on macOS: see "Entwicklung" in `README.md`.
+- Build problems on macOS: see "Development environment" in `docs/en/developer/contributing.md`.

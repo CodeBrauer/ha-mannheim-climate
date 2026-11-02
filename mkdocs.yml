@@ -1,0 +1,39 @@
+# English documentation site (the source), see mkdocs.base.yml for shared settings.
+INHERIT: mkdocs.base.yml
+site_url: https://codebrauer.github.io/ha-mannheim-climate/
+edit_uri: edit/main/docs/en/
+copyright: Unofficial project, not affiliated with Smart City Mannheim GmbH or the city of Mannheim.
+
+docs_dir: docs/en
+site_dir: site
+
+nav:
+  - index.md
+  - User guide:
+      - user/installation.md
+      - user/setup.md
+      - user/entities.md
+      - user/stations.md
+      - user/api-limits.md
+      - user/troubleshooting.md
+  - Developer guide:
+      - developer/architecture.md
+      - developer/data-flow.md
+      - developer/aggregation.md
+      - developer/reference-data.md
+      - developer/contributing.md
+  - data-sources.md
+
+theme:
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: lucide/moon
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: lucide/sun
+        name: Switch to light mode

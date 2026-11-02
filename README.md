@@ -2,7 +2,7 @@
 
 # Klimamessnetz Mannheim für Home Assistant
 
-**Deutsch** · [English](README.en.md)
+**Deutsch** · [English](README.en.md) · [Dokumentation](https://codebrauer.github.io/ha-mannheim-climate/de/)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 
@@ -18,7 +18,22 @@ mehrere Stationen um dich herum.
 > Inoffizielles Projekt, nicht verbunden mit der Smart City Mannheim GmbH oder der Stadt
 > Mannheim.
 
-<p align="center"><img src="docs/screenshots/04-map.jpg" alt="Interaktive Stationskarte" width="800"></p>
+<p align="center"><img src="docs/screenshots/de/04-map.jpg" alt="Interaktive Stationskarte" width="800"></p>
+
+## Warum?
+
+Die Idee entstand aus einem einfachen Wunsch: eine gute Außentemperatur in Home Assistant,
+die vor Ort gemessen und nicht über die globale Anbindung eines Wetterdienstes aus
+Wettermodellen geschätzt wird. Die üblichen Alternativen überzeugen dafür kaum:
+
+- **Zigbee- und Tuya-Klimasensoren** taugen draußen meist wenig: keine aktive Belüftung,
+  der Montagepunkt oder Untergrund heizt sich auf, die Sensoren sind teils ungenau, und
+  die Batterien müssen oft gewechselt werden.
+- **Eine eigene Wetterstation** ist vergleichsweise teuer und muss zusätzlich
+  Smart-Home-fähig sein.
+
+Immer mehr Städte betreiben eigene Stadtklima-Messnetze. Diese Integration macht das Netz
+von Smart City Mannheim in Home Assistant nutzbar.
 
 ## Funktionen
 
@@ -95,9 +110,9 @@ kopieren und Home Assistant neu starten.
 
 | Standort | Stationen |
 |---|---|
-| ![Standort wählen](docs/screenshots/01-location.jpg) | ![Empfehlung und Auswahlwege](docs/screenshots/03-menu.png) |
+| ![Standort wählen](docs/screenshots/de/01-location.jpg) | ![Empfehlung und Auswahlwege](docs/screenshots/de/03-menu.png) |
 | **Gerät mit Sensoren** | **Dashboard** |
-| ![Gerät mit allen Sensoren](docs/screenshots/06-device.png) | ![Werte im Dashboard](docs/screenshots/07-dashboard.png) |
+| ![Gerät mit allen Sensoren](docs/screenshots/de/06-device.png) | ![Werte im Dashboard](docs/screenshots/de/07-dashboard.png) |
 
 Später änderst du Stationen, Intervall und Taupunkt-Korrektur unter *Konfigurieren*. Die
 interaktive Karte erreichst du dort über *Neu konfigurieren* (Home Assistant zeigt externe

@@ -1,0 +1,78 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "docs/**"
+      - "mkdocs*.yml"
+      - "requirements_docs.txt"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "docs/**"
+      - "mkdocs*.yml"
+      - "requirements_docs.txt"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs.yml"
+
+permissions: {}
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.14"
+          cache: "pip"
+          cache-dependency-path: requirements_docs.txt
+
+      - name: Install requirements
+        run: python3 -m pip install -r requirements_docs.txt
+
+      - name: Check the German translation
+        run: python3 scripts/check_docs.py
+
+      # English first: it writes site/, the German build adds site/de/.
+      - name: Build
+        run: |
+          zensical build --strict -f mkdocs.yml
+          zensical build --strict -f mkdocs.de.yml
+
+      - name: Upload the site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    name: "Deploy"
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: "ubuntu-latest"
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

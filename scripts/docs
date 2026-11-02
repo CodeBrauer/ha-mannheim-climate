@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Usage: scripts/docs [de]   serve the English (or German) docs on http://localhost:8000
+#        scripts/docs build  translation check and strict build of both languages into site/
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+# Zensical runs in a throwaway uv environment, separate from the Home Assistant .venv.
+zensical() {
+    uv run --no-project --with-requirements requirements_docs.txt zensical "$@"
+}
+
+case "${1:-en}" in
+    en)
+        zensical serve -f mkdocs.yml
+        ;;
+    de)
+        zensical serve -f mkdocs.de.yml
+        ;;
+    build)
+        python3 scripts/check_docs.py
+        # English first: it writes site/, the German build adds site/de/.
+        zensical build --strict -f mkdocs.yml
+        zensical build --strict -f mkdocs.de.yml
+        ;;
+    *)
+        echo "Usage: scripts/docs [de|build]" >&2
+        exit 1
+        ;;
+esac

@@ -16,10 +16,10 @@ API_BASE_URL = "https://api.smartmannheim.de/climate"
 REQUEST_TIMEOUT_S = 15
 DEFAULT_RETRY_AFTER_S = 120
 
-# Client-side mirror of the API limits (per public IP, see README). Documented:
-# 30 measurement requests per hour. Observed: short fixed windows (~5 requests per
-# 2 min per server instance, at least two instances) and rejected requests count
-# too, so after a 429 we wait for Retry-After instead of retrying.
+# Client-side mirror of the API limits (per public IP, see docs/en/user/api-limits.md).
+# Documented: 30 measurement requests per hour. Observed: short fixed windows (~5
+# requests per 2 min per server instance, at least two instances) and rejected
+# requests count too, so after a 429 we wait for Retry-After instead of retrying.
 MEASUREMENT_BUDGET_PER_HOUR = 30
 # (max requests, window in seconds); every window must have room for a request.
 MEASUREMENT_LIMITS = ((4, 120), (MEASUREMENT_BUDGET_PER_HOUR, 3600))

@@ -2,7 +2,7 @@
 
 # Klimamessnetz Mannheim for Home Assistant
 
-[Deutsch](README.md) · **English**
+[Deutsch](README.md) · **English** · [Documentation](https://codebrauer.github.io/ha-mannheim-climate/)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 
@@ -16,7 +16,22 @@ stations around you instead.
 
 > Unofficial project. Not affiliated with Smart City Mannheim GmbH or the city of Mannheim.
 
-<p align="center"><img src="docs/screenshots/04-map.jpg" alt="Interactive station map" width="800"></p>
+<p align="center"><img src="docs/screenshots/en/04-map.jpg" alt="Interactive station map" width="800"></p>
+
+## Why?
+
+It started with a simple wish: a good outdoor temperature in Home Assistant that is
+measured on site, not estimated from weather models by a global weather service. The usual
+alternatives fall short:
+
+- **Zigbee and Tuya climate sensors** are mostly a poor fit outdoors: no active
+  ventilation, the mounting point or surface heats up, some sensors are imprecise, and the
+  batteries need frequent changes.
+- **A weather station of your own** is comparatively expensive and also has to work with
+  your smart home.
+
+More and more cities run their own urban climate networks. This integration makes the
+network of Smart City Mannheim usable in Home Assistant.
 
 ## Features
 
@@ -90,15 +105,13 @@ restart Home Assistant.
 
 | Location | Stations |
 |---|---|
-| ![Choose the location](docs/screenshots/01-location.jpg) | ![Recommendation and ways to choose](docs/screenshots/03-menu.png) |
+| ![Choose the location](docs/screenshots/en/01-location.jpg) | ![Recommendation and ways to choose](docs/screenshots/en/03-menu.png) |
 | **Device with sensors** | **Dashboard** |
-| ![Device with all sensors](docs/screenshots/06-device.png) | ![Values on a dashboard](docs/screenshots/07-dashboard.png) |
+| ![Device with all sensors](docs/screenshots/en/06-device.png) | ![Values on a dashboard](docs/screenshots/en/07-dashboard.png) |
 
 Later you change stations, update interval and dew point correction under *Configure*. The
 interactive map is available via *Reconfigure* (Home Assistant does not reliably show
 external windows in options dialogs).
-
-Screenshots show the German user interface.
 
 ### How the recommendation works
 

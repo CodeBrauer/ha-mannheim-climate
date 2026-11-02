@@ -21,6 +21,9 @@ config/*
 # reference data build cache
 .cache
 
+# documentation build
+/site
+
 # local Claude Code config; skills are shared
 .claude/*
 !.claude/skills/

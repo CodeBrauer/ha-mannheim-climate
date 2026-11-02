@@ -1,0 +1,19 @@
+/* Screenshot galleries: thumbnails of equal size, the lightbox shows the whole image. */
+.screenshots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.8rem;
+}
+
+.screenshots p {
+  margin: 0;
+}
+
+.screenshots img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.4rem;
+}
