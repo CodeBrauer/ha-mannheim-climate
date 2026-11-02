@@ -51,6 +51,12 @@ rain sensors:
 | Cloudy | less than 25 % |
 | Unknown | at night, with the sun lower than 10° or with fewer than 3 stations measuring irradiance |
 
+<div class="screenshots" markdown>
+
+![Weather entity details](../screenshots/09-weather.png)
+
+</div>
+
 ![Values on a dashboard](../screenshots/07-dashboard.png)
 
 ## When values are missing

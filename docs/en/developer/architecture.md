@@ -86,6 +86,34 @@ sequenceDiagram
 Sensors are created only for values a selected sensor measures (`parameters` of the API
 sensor). Option changes reload the entry (`OptionsFlowWithReload`).
 
+## Station map page
+
+The map is an external step of the config flow, served by Home Assistant itself:
+
+```mermaid
+sequenceDiagram
+    participant Flow as Config flow
+    participant Map as MapView
+    participant Browser
+    Flow->>Map: MapSessions.create(flow, selection, payload)
+    Flow-->>Browser: external step with /api/mannheim_climate/map/{token}
+    Browser->>Map: GET page (payload embedded)
+    Browser->>Browser: Leaflet map, tiles from basemap.de
+    Browser->>Map: POST stations and wind station
+    Map->>Map: StationSelection.validate()
+    Map->>Flow: async_configure(map_selection)
+    Flow->>Flow: external step done, create or update the entry
+```
+
+- The page needs no Home Assistant login, so the link is an unguessable token that is bound
+  to the flow and expires after `MAP_SESSION_TTL`. Responses are not cached.
+- The server validates the selection again; the page only helps to stay within the budget.
+- `www/map.js` repeats the budget rules of `StationSelection` to show the interval live.
+  Change both together.
+- Texts come from the `map_page` selector in `strings.json`, in the system language.
+- Leaflet is vendored in `www/leaflet/`; static files are served under `STATIC_URL` with a
+  content hash as cache buster.
+
 ## Config entry
 
 `VERSION = 1`, no migrations yet. Changes to this format need a migration (see

@@ -1,4 +1,4 @@
-<!-- source: 0159cbe409c98c40a358b21413d55a5dcc7f480e -->
+<!-- source: e999ef4bda6bbeeec2264ecfdf1c8d437d1fec44 -->
 # Entitäten
 
 Jeder Standort liefert Sensoren und eine Wetter-Entität. Gemessen wird alle 10 Minuten, die
@@ -53,6 +53,12 @@ Regensensoren hat:
 | Teilweise bewölkt | mindestens 25 % |
 | Bewölkt | weniger als 25 % |
 | Unbekannt | nachts, bei Sonnenstand unter 10° oder wenn weniger als 3 Stationen Strahlung messen |
+
+<div class="screenshots" markdown>
+
+![Details der Wetter-Entität](../screenshots/09-weather.png)
+
+</div>
 
 ![Werte im Dashboard](../screenshots/07-dashboard.png)
 

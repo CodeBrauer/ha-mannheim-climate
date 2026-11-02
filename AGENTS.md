@@ -18,7 +18,7 @@ Home Assistant custom integration `mannheim_climate` ("Klimamessnetz Mannheim").
 | `coordinator.py` | Polling per location, catch-up of deferred requests, repair issues |
 | `sensor.py`, `weather.py`, `diagnostics.py` | Entities and diagnostics |
 | `tests/` | pytest with `pytest-homeassistant-custom-component` |
-| `docs/`, `mkdocs.yml`, `mkdocs.de.yml` | Documentation site (Zensical, GitHub Pages): `docs/en/` source, `docs/de/` German translation |
+| `docs/`, `mkdocs*.yml` | Documentation site (Zensical, GitHub Pages): `docs/en/` source, `docs/de/` German translation |
 | `config/` | Local dev instance (gitignored) |
 
 ## Commands
@@ -29,6 +29,7 @@ scripts/develop    # dev instance on http://localhost:8123
 scripts/lint       # ruff format + check (select = ALL), docs translation check
 scripts/test       # pytest, arguments are passed through
 scripts/docs       # docs on http://localhost:8000 (`de`: German, `build`: check + strict build)
+uv run --no-project --with playwright python scripts/screenshots.py  # docs screenshots, needs scripts/develop
 ```
 
 Run `scripts/lint` and `scripts/test` before every push. CI runs lint, pytest, hassfest, HACS validation and, for docs changes, the strict docs build; all must pass.
@@ -38,7 +39,7 @@ Run `scripts/lint` and `scripts/test` before every push. CI runs lint, pytest, h
 - Code, comments, commits, issues, PRs and release notes are written in English.
 - `README.md` is German (shown by HACS), `README.en.md` is its English version. Change both together.
 - UI strings: `strings.json` is the source, `translations/en.json` an identical copy, `translations/de.json` the German translation. Change all three together with identical keys.
-- Docs site: `docs/en/` is the source, `docs/de/` its German translation with the same files and outline. A PR that changes documented behaviour updates both; `scripts/check_docs.py` enforces the sync. Workflow (translate only the diff): [`.claude/skills/docs-site/SKILL.md`](.claude/skills/docs-site/SKILL.md).
+- Docs site: `docs/en/` is the source, `docs/de/` its German translation with the same files and outline. A PR that changes documented behaviour updates both, and the READMEs where they describe it; `scripts/check_docs.py` enforces the sync of the docs. Workflow (translate only the diff): [`.claude/skills/docs-site/SKILL.md`](.claude/skills/docs-site/SKILL.md).
 
 ## Versioning
 

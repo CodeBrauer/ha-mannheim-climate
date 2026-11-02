@@ -23,7 +23,7 @@ Every sentence exists twice, so keep the token cost low: translate only what cha
 
 ## Add, move or remove a page
 
-- Both languages at the same path; update `nav` in `mkdocs.yml` and `mkdocs.de.yml`. Section names are translated there, page titles come from the first heading.
+- Both languages at the same path; update `nav` in `mkdocs.yml` and `mkdocs.de.yml`. Section names are translated there, page titles come from the first heading. Shared settings go to `mkdocs.base.yml`; lists set there must not be repeated in a language file, because `INHERIT` appends lists.
 - Stamp a new translation once it is complete.
 
 ## Translation rules
@@ -55,4 +55,5 @@ Every sentence exists twice, so keep the token cost low: translate only what cha
 
 - Describe behaviour for the reader and name the constant from `const.py` instead of copying code. Current state only, no history.
 - Keep pages short; facts that change often (numbers, limits) belong in one place, other pages link there.
-- Images live in `docs/screenshots/` (shared with the READMEs); each language folder reaches them through its `screenshots` symlink.
+- Screenshots live in `docs/screenshots/de/` and `docs/screenshots/en/` (also used by the READMEs). Each language folder links its own as `screenshots/`, so both languages use the same image paths. Regenerate them with `scripts/screenshots.py` (both languages at once, needs the running dev instance) instead of editing images by hand; a new motif goes into that script.
+- Dialog screenshots go into a `<div class="screenshots" markdown>` gallery (thumbnails, the lightbox shows the full image); page-wide screenshots stand alone.

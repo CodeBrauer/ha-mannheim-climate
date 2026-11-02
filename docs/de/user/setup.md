@@ -1,10 +1,9 @@
-<!-- source: 749b76c598c3fb0ee56003ad92e927ae40f49ae6 -->
+<!-- source: 737abcb824056b007dd3bedae7d153292322c222 -->
 # Einrichtung
 
 *Einstellungen → Geräte & Dienste → Integration hinzufügen → Klimamessnetz Mannheim*
 
-Jeder Standort, den du hinzufügst, wird ein eigenes Gerät mit eigenen Entitäten. Die
-Screenshots zeigen die deutsche Oberfläche.
+Jeder Standort, den du hinzufügst, wird ein eigenes Gerät mit eigenen Entitäten.
 
 ```mermaid
 flowchart TD
@@ -22,6 +21,18 @@ flowchart TD
     Menu -->|Aus einer Liste auswählen| Form[Liste der Stationen in der Nähe] --> Done
 ```
 
+<div class="screenshots" markdown>
+
+![1. Standort](../screenshots/01-location.jpg)
+
+![2. Umgebung](../screenshots/02-environment.png)
+
+![3. Stationen](../screenshots/03-menu.png)
+
+![Aus einer Liste auswählen](../screenshots/05-list.png)
+
+</div>
+
 ## 1. Standort
 
 Verschiebe den Pin an den Ort, für den du Werte möchtest. Er startet bei deinem Zuhause aus
@@ -32,8 +43,6 @@ höchstens 10 km.
   Fehler.
 - Zwei Standorte, die weniger als etwa 100 m auseinander liegen, gelten als derselbe und
   lassen sich nicht doppelt anlegen.
-
-![Standort wählen](../screenshots/01-location.jpg)
 
 ## 2. Umgebung
 
@@ -61,8 +70,6 @@ Aktualisierungsintervall.
 | **Auf der interaktiven Karte auswählen** | Öffnet die Karte in einem neuen Fenster. Klicke Stationen an, um sie aus- oder abzuwählen, und wähle eine Windstation. Nach *Speichern* geht die Einrichtung von selbst weiter. |
 | **Aus einer Liste auswählen** | Zeigt die 15 nächsten Stationen, die Empfehlung vorausgewählt, und eine Liste der Windstationen. |
 
-![Empfehlung und Auswahlwege](../screenshots/03-menu.png)
-
 Beschriftungen wie `444 m ↙ · Seckenheim (2507LH096) · locker bebaut · empfohlen` zeigen
 Entfernung und Richtung von deinem Standort aus, den Stadtteil, den Stationscode, die
 Umgebung und Kennzeichen (*Dach/Hochpunkt*, *empfohlen*).
@@ -70,12 +77,16 @@ Umgebung und Kennzeichen (*Dach/Hochpunkt*, *empfohlen*).
 ### Interaktive Karte
 
 - Zeigt bis zu 60 Stationen um den Standort, nach Entfernung nummeriert, mit dem Suchradius.
+  Die Legende erklärt die Markierungen: ausgewählt, empfohlen, weitere Station, Dach oder
+  Hochpunkt und dein Standort.
 - Lässt nur so viele Stationen zu, wie ins API-Budget passen, und zeigt das
   Aktualisierungsintervall live an.
 - Der Link gilt nur für diese Einrichtung und 30 Minuten lang. Ist er abgelaufen, starte die
   Einrichtung neu.
-- Die Kartenkacheln kommen von [basemap.de](https://basemap.de/) und werden von deinem
-  Browser geladen.
+- Die Kartenkacheln kommen von [basemap.de](https://basemap.de/); dein Browser lädt sie von
+  `sgx.geodatenzentrum.de`.
+
+![Interaktive Stationskarte](../screenshots/04-map.jpg)
 
 ## Das Gerät
 
@@ -102,6 +113,12 @@ Minuten Verzögerung.
 
 Speichern lädt den Standort neu. Misst die neue Auswahl weniger Werte, werden Entitäten, die
 nicht mehr bereitgestellt werden, nicht verfügbar und lassen sich löschen.
+
+<div class="screenshots" markdown>
+
+![Konfigurieren](../screenshots/08-options.png)
+
+</div>
 
 ## Standort verschieben
 

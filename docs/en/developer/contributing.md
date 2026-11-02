@@ -13,6 +13,7 @@ apply to humans and AI agents alike.
 | `scripts/lint` | `ruff format` and `ruff check` (`select = ALL`), then the documentation check |
 | `scripts/test` | pytest; arguments are passed on, e.g. `scripts/test -k recommend` |
 | `scripts/docs` | Serves the documentation locally; `scripts/docs de` for German, `scripts/docs build` for both |
+| `scripts/screenshots.py` | Takes the documentation screenshots in both languages from the running dev instance: `uv run --no-project --with playwright python scripts/screenshots.py` |
 
 On macOS some Home Assistant dependencies (`pymicro-vad`, `pyspeex-noise`) have no wheels
 for Python 3.14 and fail to compile. Build them once with the SDK path:
@@ -24,6 +25,15 @@ SDK=$(xcrun --show-sdk-path) SDKROOT="$SDK" CXXFLAGS="-isysroot $SDK -I$SDK/usr/
 !!! warning "The API is shared"
     The API limits apply per public IP, shared with your own Home Assistant. Never poll the
     live API in loops or scripts. Tests never call it; they use `tests/fixtures/sensors.json`.
+
+## Typical changes
+
+| Change | Places to touch |
+|---|---|
+| New sensor | `SENSORS` in `sensor.py`; its name in `strings.json` and `translations/` if it has a `translation_key`; [Entities](../user/entities.md) and the READMEs |
+| New option or config entry field | `config_flow.py` with a migration (`VERSION`/`MINOR_VERSION`); `strings.json` and `translations/`; [Setup](../user/setup.md) and [Config entry](architecture.md#config-entry) |
+| Budget, limits or intervals | `const.py` (discuss in an issue first); `selection.py` and `www/map.js` share the budget rules; [API limits](../user/api-limits.md) |
+| Text of the map page | The `map_page` selector in `strings.json` and `translations/` |
 
 ## Continuous integration
 
@@ -46,8 +56,10 @@ This site is built with [Zensical](https://zensical.org) from Markdown in `docs/
 |---|---|
 | `docs/en/` | English pages, the source |
 | `docs/de/` | German translation, same files and structure |
-| `docs/screenshots/` | Images, shared with the READMEs (linked into both languages) |
-| `mkdocs.yml`, `mkdocs.de.yml` | Site configuration; the German one inherits the English one |
+| `docs/screenshots/` | Screenshots per language (`de/`, `en/`) from `scripts/screenshots.py`, also used by the READMEs |
+| `docs/assets/` | Stylesheet, shared by both languages |
+| `mkdocs.base.yml` | Shared site configuration |
+| `mkdocs.yml`, `mkdocs.de.yml` | Navigation and language settings of each language |
 
 Changes that alter documented behaviour update the pages in both languages in the same pull
 request. `scripts/check_docs.py` makes sure nothing is forgotten: every English page needs a

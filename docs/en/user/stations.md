@@ -37,8 +37,9 @@ flowchart TD
 - The wind station is the nearest station with a wind sensor, wherever it is mounted.
 - The reason is shown with the recommendation: the nearest station fits, is too far away
   or has other surroundings.
-- *Use the recommendation* is only offered if it fits the [API budget](api-limits.md), for
-  example when other locations already use most of it.
+- *Use the recommendation* is not offered if it does not fit the [API budget](api-limits.md),
+  for example because other locations already use most of it. Choose fewer stations from the
+  map or the list then.
 
 ## Choosing yourself
 

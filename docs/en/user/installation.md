@@ -7,7 +7,7 @@
 | Home Assistant | 2026.9 or newer |
 | HACS | 2.0.5 or newer (only for installation via HACS) |
 | Internet | Access to `api.smartmannheim.de` from Home Assistant |
-| Browser | Access to `basemap.de` for the map tiles of the station map |
+| Browser | Access to `sgx.geodatenzentrum.de` for the map tiles (basemap.de) of the station map |
 
 The API is public and needs no account or key.
 

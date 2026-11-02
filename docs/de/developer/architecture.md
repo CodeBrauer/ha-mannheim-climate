@@ -1,4 +1,4 @@
-<!-- source: 6d1435fbe02ea90c6320912b226f866736816517 -->
+<!-- source: 9a05306a1623353baa6a171eef98020994e79566 -->
 # Architektur
 
 Die Integration liegt in `custom_components/mannheim_climate/`. Die Konventionen für die
@@ -86,6 +86,35 @@ sequenceDiagram
 
 Sensoren werden nur für Werte angelegt, die ein gewählter Sensor misst (`parameters` des
 API-Sensors). Änderungen an den Optionen laden den Eintrag neu (`OptionsFlowWithReload`).
+
+## Kartenseite
+
+Die Karte ist ein externer Schritt des Config Flows, ausgeliefert von Home Assistant selbst:
+
+```mermaid
+sequenceDiagram
+    participant Flow as Config Flow
+    participant Map as MapView
+    participant Browser
+    Flow->>Map: MapSessions.create(flow, selection, payload)
+    Flow-->>Browser: externer Schritt mit /api/mannheim_climate/map/{token}
+    Browser->>Map: GET Seite (Payload eingebettet)
+    Browser->>Browser: Leaflet-Karte, Kacheln von basemap.de
+    Browser->>Map: POST Stationen und Windstation
+    Map->>Map: StationSelection.validate()
+    Map->>Flow: async_configure(map_selection)
+    Flow->>Flow: externer Schritt fertig, Eintrag anlegen oder aktualisieren
+```
+
+- Die Seite braucht kein Home-Assistant-Login, deshalb ist der Link ein nicht erratbares
+  Token, das an den Flow gebunden ist und nach `MAP_SESSION_TTL` abläuft. Antworten werden
+  nicht gecacht.
+- Der Server prüft die Auswahl erneut; die Seite hilft nur, im Budget zu bleiben.
+- `www/map.js` wiederholt die Budget-Regeln von `StationSelection`, um das Intervall live
+  anzuzeigen. Ändere beide zusammen.
+- Die Texte kommen aus dem Selector `map_page` in `strings.json`, in der Systemsprache.
+- Leaflet liegt mitgeliefert in `www/leaflet/`; die statischen Dateien werden unter
+  `STATIC_URL` mit einem Inhalts-Hash als Cache-Buster ausgeliefert.
 
 ## Config Entry
 

@@ -1,4 +1,4 @@
-<!-- source: 5a9c42eaeacded6128ea2bf9acd6051c8d6ac3c8 -->
+<!-- source: 7102eaaca25bc3183e75cda09002e45c146656e1 -->
 # Reparaturen und Fehlersuche
 
 ## Reparaturhinweise
@@ -89,7 +89,7 @@ actions:
 | Meldung | Bedeutung |
 |---|---|
 | Im Umkreis von 10 km gibt es keine Station. | Wähle einen Ort in oder bei Mannheim. |
-| Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. | Die API ist nicht erreichbar und es gibt noch keine gespeicherte Stationsliste. Beim Start wiederholt Home Assistant die Einrichtung von selbst. |
+| Die Stationsliste konnte nicht von api.smartmannheim.de geladen werden. | Die API ist nicht erreichbar und es gibt noch keine gespeicherte Stationsliste. Beim Hinzufügen eines Standorts versuch es später erneut; beim Start wiederholt Home Assistant es von selbst. |
 | Zu viele API-Abfragen pro Stunde. | Die Auswahl passt nicht ins Budget. Wähle weniger Stationen, keine Windstation oder ein längeres Intervall. |
 | Keine der gewählten Stationen existiert mehr. | Alle Stationen des Standorts sind weg. Wähle unter *Konfigurieren* neue. |
 | Das Abfrage-Budget der API ist gerade aufgebraucht. | Der Standort versucht es nach der angegebenen Zeit von selbst erneut. |

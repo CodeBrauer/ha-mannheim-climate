@@ -2,8 +2,7 @@
 
 *Settings → Devices & services → Add integration → Klimamessnetz Mannheim*
 
-Each location you add becomes its own device with its own entities. The screenshots show the
-German user interface.
+Each location you add becomes its own device with its own entities.
 
 ```mermaid
 flowchart TD
@@ -21,6 +20,18 @@ flowchart TD
     Menu -->|Choose from a list| Form[List of nearby stations] --> Done
 ```
 
+<div class="screenshots" markdown>
+
+![1. Location](../screenshots/01-location.jpg)
+
+![2. Surroundings](../screenshots/02-environment.png)
+
+![3. Stations](../screenshots/03-menu.png)
+
+![Choose from a list](../screenshots/05-list.png)
+
+</div>
+
 ## 1. Location
 
 Move the pin to the place you want values for. It starts at your Home Assistant home
@@ -29,8 +40,6 @@ location. The circle is the search radius for the recommendation: 3 km by defaul
 
 - There must be a temperature station within 10 km, otherwise the step shows an error.
 - Two locations closer than about 100 m count as the same and cannot be added twice.
-
-![Choose the location](../screenshots/01-location.jpg)
 
 ## 2. Surroundings
 
@@ -57,8 +66,6 @@ The step shows the recommendation, why it was chosen and the resulting update in
 | **Choose on the interactive map** | Opens the map in a new window. Click stations to select or deselect them and pick a wind station. After *Save* the setup continues by itself. |
 | **Choose from a list** | Shows the 15 nearest stations, the recommendation pre-selected, and a list of wind stations. |
 
-![Recommendation and ways to choose](../screenshots/03-menu.png)
-
 Labels such as `444 m ↙ · Seckenheim (2507LH096) · open built-up · recommended` show the
 distance and direction seen from your location, the district, the station code, the
 surroundings and flags (*roof/high point*, *recommended*).
@@ -66,10 +73,15 @@ surroundings and flags (*roof/high point*, *recommended*).
 ### Interactive map
 
 - Shows up to 60 stations around the location, numbered by distance, with the search radius.
+  The legend explains the markers: selected, recommended, other station, roof or high point
+  and your location.
 - Only allows as many stations as fit the API budget and shows the update interval live.
 - The link is only valid for this setup and for 30 minutes. If it expired, start the setup
   again.
-- Map tiles come from [basemap.de](https://basemap.de/) and are loaded by your browser.
+- Map tiles come from [basemap.de](https://basemap.de/); your browser loads them from
+  `sgx.geodatenzentrum.de`.
+
+![Interactive station map](../screenshots/04-map.jpg)
 
 ## The device
 
@@ -95,6 +107,12 @@ the API budget. New values arrive every 10 minutes with 10–20 minutes delay an
 
 Saving reloads the location. If the new selection measures fewer values, entities that are
 no longer provided become unavailable and can be deleted.
+
+<div class="screenshots" markdown>
+
+![Configure](../screenshots/08-options.png)
+
+</div>
 
 ## Move a location
 

@@ -87,7 +87,7 @@ actions:
 | Message | Meaning |
 |---|---|
 | There is no station within 10 km of this place. | Pick a place in or near Mannheim. |
-| The station list could not be loaded from api.smartmannheim.de. | The API is unreachable and there is no stored station list yet. At startup Home Assistant retries the setup by itself. |
+| The station list could not be loaded from api.smartmannheim.de. | The API is unreachable and there is no stored station list yet. When adding a location, try again later; at startup Home Assistant retries by itself. |
 | Too many API requests per hour. | The selection does not fit the budget. Select fewer stations, no wind station or a longer interval. |
 | None of the selected stations exists any more. | All stations of the location are gone. Choose new ones under *Configure*. |
 | The API request budget is used up for the moment. | The location retries by itself after the given time. |

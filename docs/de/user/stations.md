@@ -1,4 +1,4 @@
-<!-- source: ed8f86afc31a7033dfbd34be2d795ff92f46c432 -->
+<!-- source: 554995436d3e4c7330ef503f308147863b4d8f17 -->
 # Stationsempfehlung
 
 Das Netz hat über 400 Stationen, viele davon in Straßenschluchten, auf Dächern oder in Parks,
@@ -38,8 +38,9 @@ flowchart TD
 - Die Windstation ist die nächste Station mit Windsensor, egal wo sie montiert ist.
 - Die Begründung steht bei der Empfehlung: Die nächste Station passt, ist zu weit weg oder
   hat eine andere Umgebung.
-- *Empfehlung übernehmen* wird nur angeboten, wenn sie ins [API-Budget](api-limits.md)
-  passt, zum Beispiel nicht, wenn andere Standorte schon den Großteil davon nutzen.
+- *Empfehlung übernehmen* fehlt, wenn die Empfehlung nicht ins [API-Budget](api-limits.md)
+  passt, zum Beispiel weil andere Standorte schon den Großteil davon nutzen. Wähle dann auf
+  der Karte oder in der Liste weniger Stationen.
 
 ## Selbst wählen
 

@@ -1,4 +1,4 @@
-<!-- source: a5d370806356e0ff6cf3a6358303d68ba7846140 -->
+<!-- source: 2971943981cd7479a3bb1bf51cf44546cd5a7bc0 -->
 # Mitarbeit
 
 Die Regeln für Code, Tests, Commits, Pull Requests und Versionierung stehen in
@@ -14,6 +14,7 @@ gelten für Menschen und KI-Agenten gleichermaßen.
 | `scripts/lint` | `ruff format` und `ruff check` (`select = ALL`), danach der Doku-Check |
 | `scripts/test` | pytest; Argumente werden weitergegeben, z. B. `scripts/test -k recommend` |
 | `scripts/docs` | Startet die Doku lokal; `scripts/docs de` für Deutsch, `scripts/docs build` für beide |
+| `scripts/screenshots.py` | Erstellt die Screenshots der Doku in beiden Sprachen aus der laufenden Dev-Instanz: `uv run --no-project --with playwright python scripts/screenshots.py` |
 
 Unter macOS gibt es für einige Abhängigkeiten von Home Assistant (`pymicro-vad`,
 `pyspeex-noise`) keine Wheels für Python 3.14, und der Build scheitert. Einmal mit SDK-Pfad
@@ -27,6 +28,15 @@ SDK=$(xcrun --show-sdk-path) SDKROOT="$SDK" CXXFLAGS="-isysroot $SDK -I$SDK/usr/
     Die API-Limits gelten pro öffentlicher IP, geteilt mit deinem eigenen Home Assistant.
     Frag die echte API nie in Schleifen oder Skripten ab. Tests rufen sie nie auf; sie nutzen
     `tests/fixtures/sensors.json`.
+
+## Typische Änderungen
+
+| Änderung | Betroffene Stellen |
+|---|---|
+| Neuer Sensor | `SENSORS` in `sensor.py`; sein Name in `strings.json` und `translations/`, wenn er einen `translation_key` hat; [Entitäten](../user/entities.md) und die READMEs |
+| Neue Option oder neues Feld im Config Entry | `config_flow.py` mit Migration (`VERSION`/`MINOR_VERSION`); `strings.json` und `translations/`; [Einrichtung](../user/setup.md) und [Config Entry](architecture.md#config-entry) |
+| Budget, Limits oder Intervalle | `const.py` (vorher in einem Issue besprechen); `selection.py` und `www/map.js` teilen sich die Budget-Regeln; [API-Limits](../user/api-limits.md) |
+| Texte der Kartenseite | Der Selector `map_page` in `strings.json` und `translations/` |
 
 ## Continuous Integration
 
@@ -49,8 +59,10 @@ Diese Seite wird mit [Zensical](https://zensical.org) aus Markdown in `docs/` ge
 |---|---|
 | `docs/en/` | Englische Seiten, die Quelle |
 | `docs/de/` | Deutsche Übersetzung, gleiche Dateien und Struktur |
-| `docs/screenshots/` | Bilder, gemeinsam mit den READMEs (in beide Sprachen verlinkt) |
-| `mkdocs.yml`, `mkdocs.de.yml` | Konfiguration der Seite; die deutsche erbt von der englischen |
+| `docs/screenshots/` | Screenshots je Sprache (`de/`, `en/`) aus `scripts/screenshots.py`, auch für die READMEs |
+| `docs/assets/` | Stylesheet, gemeinsam für beide Sprachen |
+| `mkdocs.base.yml` | Gemeinsame Konfiguration der Seite |
+| `mkdocs.yml`, `mkdocs.de.yml` | Navigation und Spracheinstellungen jeder Sprache |
 
 Änderungen, die dokumentiertes Verhalten ändern, passen die Seiten in beiden Sprachen im
 selben Pull Request an. `scripts/check_docs.py` sorgt dafür, dass nichts vergessen wird: Jede
