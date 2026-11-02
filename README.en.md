@@ -18,6 +18,21 @@ stations around you instead.
 
 <p align="center"><img src="docs/screenshots/en/04-map.jpg" alt="Interactive station map" width="800"></p>
 
+## Why?
+
+It started with a simple wish: a good outdoor temperature in Home Assistant that is
+measured on site, not estimated from weather models by a global weather service. The usual
+alternatives fall short:
+
+- **Zigbee and Tuya climate sensors** are mostly a poor fit outdoors: no active
+  ventilation, the mounting point or surface heats up, some sensors are imprecise, and the
+  batteries need frequent changes.
+- **A weather station of your own** is comparatively expensive and also has to work with
+  your smart home.
+
+More and more cities run their own urban climate networks. This integration makes the
+network of Smart City Mannheim usable in Home Assistant.
+
 ## Features
 
 - **Location on a map**, pre-filled with your Home Assistant home location.

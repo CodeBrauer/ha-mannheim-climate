@@ -20,6 +20,21 @@ mehrere Stationen um dich herum.
 
 <p align="center"><img src="docs/screenshots/de/04-map.jpg" alt="Interaktive Stationskarte" width="800"></p>
 
+## Warum?
+
+Die Idee entstand aus einem einfachen Wunsch: eine gute Außentemperatur in Home Assistant,
+die vor Ort gemessen und nicht über die globale Anbindung eines Wetterdienstes aus
+Wettermodellen geschätzt wird. Die üblichen Alternativen überzeugen dafür kaum:
+
+- **Zigbee- und Tuya-Klimasensoren** taugen draußen meist wenig: keine aktive Belüftung,
+  der Montagepunkt oder Untergrund heizt sich auf, die Sensoren sind teils ungenau, und
+  die Batterien müssen oft gewechselt werden.
+- **Eine eigene Wetterstation** ist vergleichsweise teuer und muss zusätzlich
+  Smart-Home-fähig sein.
+
+Immer mehr Städte betreiben eigene Stadtklima-Messnetze. Diese Integration macht das Netz
+von Smart City Mannheim in Home Assistant nutzbar.
+
 ## Funktionen
 
 - **Standort auf der Karte**, vorbelegt mit deinem Zuhause aus Home Assistant.

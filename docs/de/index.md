@@ -1,4 +1,4 @@
-<!-- source: bfed4e6c1dd55ac5c941a24423cc7a237b58e6ff -->
+<!-- source: 79a92e4bb5eb6f2b53c6f3194ca0701b382c71cd -->
 # Klimamessnetz Mannheim
 
 Home-Assistant-Integration für das dichte Stadtklima-Messnetz von
@@ -14,6 +14,21 @@ mehrere Stationen um dich herum.
 
 !!! note "Inoffizielles Projekt"
     Nicht verbunden mit der Smart City Mannheim GmbH oder der Stadt Mannheim.
+
+## Warum diese Integration
+
+Die Idee entstand aus einem einfachen Wunsch: eine gute Außentemperatur in Home Assistant,
+die vor Ort gemessen und nicht über die globale Anbindung eines Wetterdienstes aus
+Wettermodellen geschätzt wird. Die üblichen Alternativen überzeugen dafür kaum:
+
+- **Zigbee- und Tuya-Klimasensoren** taugen draußen meist wenig: keine aktive Belüftung,
+  der Montagepunkt oder Untergrund heizt sich auf, die Sensoren sind teils ungenau, und
+  die Batterien müssen oft gewechselt werden.
+- **Eine eigene Wetterstation** ist vergleichsweise teuer und muss zusätzlich
+  Smart-Home-fähig sein.
+
+Immer mehr Städte betreiben eigene Stadtklima-Messnetze. Diese Integration macht das Netz
+von Smart City Mannheim in Home Assistant nutzbar.
 
 ## Funktionen
 
