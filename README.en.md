@@ -2,7 +2,7 @@
 
 # Klimamessnetz Mannheim for Home Assistant
 
-[Deutsch](README.md) · **English**
+[Deutsch](README.md) · **English** · [Documentation](https://codebrauer.github.io/ha-mannheim-climate/)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 
