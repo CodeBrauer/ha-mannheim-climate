@@ -18,7 +18,7 @@ mehrere Stationen um dich herum.
 > Inoffizielles Projekt, nicht verbunden mit der Smart City Mannheim GmbH oder der Stadt
 > Mannheim.
 
-<p align="center"><img src="docs/screenshots/04-map.jpg" alt="Interaktive Stationskarte" width="800"></p>
+<p align="center"><img src="docs/screenshots/de/04-map.jpg" alt="Interaktive Stationskarte" width="800"></p>
 
 ## Funktionen
 

@@ -16,7 +16,7 @@ stations around you instead.
 
 > Unofficial project. Not affiliated with Smart City Mannheim GmbH or the city of Mannheim.
 
-<p align="center"><img src="docs/screenshots/04-map.jpg" alt="Interactive station map" width="800"></p>
+<p align="center"><img src="docs/screenshots/en/04-map.jpg" alt="Interactive station map" width="800"></p>
 
 ## Features
 
