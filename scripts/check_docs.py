@@ -9,7 +9,8 @@ outline: headings, code blocks, tables, images and admonitions in the same order
 German page starts with a marker holding the git blob id of the English page it was
 translated from. For an outdated page the check prints the command that shows what
 changed in English since then; once the translation is updated, --stamp sets the marker
-to the current English page and runs the check again.
+to the current English page, stores that version in git (so the command also works
+before it is committed) and runs the check again.
 """
 
 from __future__ import annotations
@@ -17,6 +18,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -144,6 +147,14 @@ def stamp(page: Path) -> None:
     translation_path.write_text(
         f"<!-- source: {blob_id(source)} -->\n{translation}", encoding="utf-8"
     )
+    if git := shutil.which("git"):
+        subprocess.run(  # noqa: S603 - fixed git command, page text on stdin
+            [git, "hash-object", "-w", "--stdin"],
+            input=source.encode(),
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
 
 
 def page_of(path: str, parser: argparse.ArgumentParser) -> Path:
